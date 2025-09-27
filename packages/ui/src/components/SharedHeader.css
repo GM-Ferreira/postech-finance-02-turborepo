@@ -1,0 +1,26 @@
+.shared-header {
+  --color-primary: #004d61;
+  --color-secondary: #dee9ea;
+  --color-tertiary: #47a138;
+  --color-warning: #ff5031;
+}
+
+.shared-header.bg-primary {
+  background-color: var(--color-primary);
+}
+
+.shared-header .text-warning {
+  color: var(--color-warning);
+}
+
+.shared-header .text-tertiary {
+  color: var(--color-tertiary);
+}
+
+.shared-header .bg-white {
+  background-color: white;
+}
+
+.shared-header .text-white {
+  color: white;
+}
