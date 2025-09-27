@@ -24,14 +24,10 @@ export const CrossAppSyncProvider = ({
   useEffect(() => {
     if (typeof window === "undefined" || !isHydrated) return;
 
-    console.log("Iniciando sincronização cross-app após hidratação");
-
     const savedState = localStorage.getItem("redux-user-state");
     if (savedState) {
       try {
         const userState = JSON.parse(savedState);
-
-        console.log("Carregando estado do localStorage:", userState);
 
         isUpdatingFromExternalRef.current = true;
         dispatch(setUser(userState));
@@ -48,13 +44,21 @@ export const CrossAppSyncProvider = ({
     if (typeof window === "undefined") return;
 
     const handleUserStateChange = (event: CustomEvent) => {
-      if (event.detail && !isUpdatingFromExternalRef.current) {
-        console.log("Recebendo mudança de outra app:", event.detail);
-        isUpdatingFromExternalRef.current = true;
-        dispatch(setUser(event.detail));
-        setTimeout(() => {
-          isUpdatingFromExternalRef.current = false;
-        }, 100);
+      if (!isUpdatingFromExternalRef.current) {
+        if (event.detail) {
+          isUpdatingFromExternalRef.current = true;
+          dispatch(setUser(event.detail));
+          setTimeout(() => {
+            isUpdatingFromExternalRef.current = false;
+          }, 100);
+        } else {
+          const isLocalLogout = localStorage.getItem("local-logout-flag");
+          if (isLocalLogout === "true") {
+            localStorage.removeItem("local-logout-flag");
+          } else {
+            localStorage.setItem("external-logout-flag", "true");
+          }
+        }
       }
     };
 

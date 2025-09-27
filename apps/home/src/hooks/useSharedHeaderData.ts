@@ -7,11 +7,13 @@ import { useAppSelector, setUser, clearUser, useAppDispatch } from "@repo/ui";
 
 export const useSharedHeaderData = () => {
   const { isLoggedIn, logout, currentUser } = useAuth();
+
   const reduxUser = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     const externalLogout = localStorage.getItem("external-logout-flag");
+
     if (externalLogout === "true" && isLoggedIn) {
       localStorage.removeItem("external-logout-flag");
       logout();
