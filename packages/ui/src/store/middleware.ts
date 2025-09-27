@@ -17,10 +17,6 @@ localStorageMiddleware.startListening({
       const isFromExternal = window.__isUpdatingFromExternal?.();
 
       if (!isFromExternal) {
-        console.log(
-          "💾 Salvando no localStorage e notificando outras apps:",
-          action.payload
-        );
         localStorage.setItem(
           "redux-user-state",
           JSON.stringify(action.payload)
@@ -30,10 +26,6 @@ localStorageMiddleware.startListening({
           new CustomEvent("redux-user-changed", {
             detail: action.payload,
           })
-        );
-      } else {
-        console.log(
-          "🔄 Mudança veio de sincronização externa, não disparando evento"
         );
       }
     }
