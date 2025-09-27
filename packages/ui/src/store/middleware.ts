@@ -42,7 +42,6 @@ localStorageMiddleware.startListening({
         const currentState = listenerApi.getState() as { user: UserState };
         const userState = currentState.user;
 
-        console.log("💾 Salvando mudança de nome no localStorage:", userState);
         localStorage.setItem("redux-user-state", JSON.stringify(userState));
 
         window.dispatchEvent(
