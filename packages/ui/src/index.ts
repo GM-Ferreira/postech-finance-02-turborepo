@@ -8,6 +8,9 @@ export { SharedHeader } from "./components/SharedHeader";
 export type { SharedHeaderProps } from "./components/SharedHeader";
 export { SharedNavigation } from "./components/SharedNavigation";
 
+// Utils
+export { UrlUtils } from "./utils/urls";
+
 // Icons
 export { LogoIcon, AvatarIcon } from "./icons";
 export type { IconProps } from "./icons";

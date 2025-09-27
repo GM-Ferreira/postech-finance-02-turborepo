@@ -3,13 +3,15 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
+import { UrlUtils } from "../utils/urls";
+
 export const SharedNavigation = () => {
   const pathname = usePathname();
 
   const navLinks = [
-    { href: "/home", label: "Início" },
-    { href: "/investments", label: "Investimentos" },
-    { href: "/cards", label: "Cartões" },
+    { href: "/home", label: "Início", app: "home" as const },
+    { href: "/investments", label: "Investimentos", app: "home" as const },
+    { href: "/cards", label: "Cartões", app: "cards" as const },
   ];
 
   const isInCardsApp = pathname === "/" || pathname.startsWith("/cards");
@@ -20,6 +22,20 @@ export const SharedNavigation = () => {
     } else {
       return linkHref === "/cards";
     }
+  };
+
+  const getNavigationUrl = (link: (typeof navLinks)[0]) => {
+    if (!isCrossAppNavigation(link.href)) {
+      return link.href;
+    }
+
+    const baseUrl = UrlUtils.getAppUrl(link.app);
+
+    if (link.app === "cards") {
+      return UrlUtils.isProduction() ? baseUrl : `${baseUrl}/cards`;
+    }
+
+    return `${baseUrl}${link.href}`;
   };
 
   return (
@@ -49,8 +65,9 @@ export const SharedNavigation = () => {
         `;
 
         if (needsCrossAppNavigation) {
+          const navigationUrl = getNavigationUrl(link);
           return (
-            <a key={link.label} href={link.href} className={commonClasses}>
+            <a key={link.label} href={navigationUrl} className={commonClasses}>
               <span className={spanClasses}>{link.label}</span>
             </a>
           );

@@ -2,14 +2,19 @@ import { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   async rewrites() {
+    const cardsInternalUrl =
+      process.env.NODE_ENV === "production"
+        ? "https://bytebank-cards.vercel.app"
+        : "http://localhost:3001";
+
     return [
       {
         source: "/cards/:path*",
-        destination: "http://localhost:3001/cards/:path*",
+        destination: `${cardsInternalUrl}/cards/:path*`,
       },
       {
         source: "/cards",
-        destination: "http://localhost:3001/cards",
+        destination: `${cardsInternalUrl}/cards`,
       },
     ];
   },
