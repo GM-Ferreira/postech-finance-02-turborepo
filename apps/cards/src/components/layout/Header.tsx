@@ -1,14 +1,20 @@
 "use client";
 
 import { SharedHeader } from "@repo/ui";
-import { useAppSelector, clearUser, useAppDispatch } from "@repo/ui";
+import {
+  useAppSelector,
+  clearUser,
+  useAppDispatch,
+  selectIsLoggedIn,
+} from "@repo/ui";
 
 const useCardsHeaderData = () => {
   const reduxUser = useAppSelector((state) => state.user);
+  const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const dispatch = useAppDispatch();
 
   return {
-    isLoggedIn: reduxUser.isLoggedIn,
+    isLoggedIn,
     currentUser: reduxUser.name ? { name: reduxUser.name } : null,
     isLoading: false,
     onLogin: () => {

@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import { setUser } from "../store/userSlice";
 import { useAppDispatch } from "../store/hooks";
 import { useHydration } from "../hooks/useHydration";
+import { StorageService } from "../services/StorageService";
 
 declare global {
   interface Window {
@@ -24,19 +25,16 @@ export const CrossAppSyncProvider = ({
   useEffect(() => {
     if (typeof window === "undefined" || !isHydrated) return;
 
-    const savedState = localStorage.getItem("redux-user-state");
-    if (savedState) {
-      try {
-        const userState = JSON.parse(savedState);
+    const storage = new StorageService();
+    const userData = storage.getUserData();
 
-        isUpdatingFromExternalRef.current = true;
-        dispatch(setUser(userState));
-        setTimeout(() => {
-          isUpdatingFromExternalRef.current = false;
-        }, 100);
-      } catch (error) {
-        console.error("Erro ao carregar estado do localStorage:", error);
-      }
+    if (userData) {
+      isUpdatingFromExternalRef.current = true;
+      dispatch(setUser(userData));
+
+      setTimeout(() => {
+        isUpdatingFromExternalRef.current = false;
+      }, 100);
     }
   }, [dispatch, isHydrated]);
 
@@ -64,13 +62,13 @@ export const CrossAppSyncProvider = ({
 
     window.__isUpdatingFromExternal = () => isUpdatingFromExternalRef.current;
     window.addEventListener(
-      "redux-user-changed",
+      "@bytebank/user-changed",
       handleUserStateChange as EventListener
     );
 
     return () => {
       window.removeEventListener(
-        "redux-user-changed",
+        "@bytebank/user-changed",
         handleUserStateChange as EventListener
       );
     };

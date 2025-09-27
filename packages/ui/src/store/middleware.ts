@@ -1,6 +1,7 @@
 import { createListenerMiddleware } from "@reduxjs/toolkit";
 
 import { setUser, clearUser, setUserName, UserState } from "./userSlice";
+import { StorageService } from "../services/StorageService";
 
 declare global {
   interface Window {
@@ -10,6 +11,8 @@ declare global {
 
 export const localStorageMiddleware = createListenerMiddleware();
 
+const storage = new StorageService();
+
 localStorageMiddleware.startListening({
   actionCreator: setUser,
   effect: (action) => {
@@ -17,13 +20,10 @@ localStorageMiddleware.startListening({
       const isFromExternal = window.__isUpdatingFromExternal?.();
 
       if (!isFromExternal) {
-        localStorage.setItem(
-          "redux-user-state",
-          JSON.stringify(action.payload)
-        );
+        storage.setUserData(action.payload);
 
         window.dispatchEvent(
-          new CustomEvent("redux-user-changed", {
+          new CustomEvent("@bytebank/user-changed", {
             detail: action.payload,
           })
         );
@@ -42,10 +42,10 @@ localStorageMiddleware.startListening({
         const currentState = listenerApi.getState() as { user: UserState };
         const userState = currentState.user;
 
-        localStorage.setItem("redux-user-state", JSON.stringify(userState));
+        storage.setUserData(userState);
 
         window.dispatchEvent(
-          new CustomEvent("redux-user-changed", {
+          new CustomEvent("@bytebank/user-changed", {
             detail: userState,
           })
         );
@@ -58,10 +58,10 @@ localStorageMiddleware.startListening({
   actionCreator: clearUser,
   effect: () => {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("redux-user-state");
+      storage.clearUserData();
 
       window.dispatchEvent(
-        new CustomEvent("redux-user-changed", {
+        new CustomEvent("@bytebank/user-changed", {
           detail: null,
         })
       );

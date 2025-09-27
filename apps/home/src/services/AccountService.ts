@@ -1,4 +1,4 @@
-import { StorageService } from "./StorageService";
+import { StorageService } from "@repo/ui";
 import { Account } from "@/models/Account";
 import {
   Transaction,

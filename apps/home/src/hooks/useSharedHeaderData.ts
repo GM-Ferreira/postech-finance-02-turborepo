@@ -3,12 +3,19 @@
 import { useEffect } from "react";
 
 import { useAuth } from "@/hooks/useAuth";
-import { useAppSelector, setUser, clearUser, useAppDispatch } from "@repo/ui";
+import {
+  useAppSelector,
+  setUser,
+  clearUser,
+  useAppDispatch,
+  selectIsLoggedIn,
+} from "@repo/ui";
 
 export const useSharedHeaderData = () => {
   const { isLoggedIn, logout, currentUser } = useAuth();
 
   const reduxUser = useAppSelector((state) => state.user);
+  const reduxIsLoggedIn = useAppSelector(selectIsLoggedIn);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -20,23 +27,22 @@ export const useSharedHeaderData = () => {
       return;
     }
 
-    if (isLoggedIn && currentUser && !reduxUser.isLoggedIn) {
+    if (isLoggedIn && currentUser && !reduxIsLoggedIn) {
       dispatch(
         setUser({
           name: currentUser.name,
           email: currentUser.email || "",
-          isLoggedIn: true,
         })
       );
-    } else if (!isLoggedIn && reduxUser.isLoggedIn) {
+    } else if (!isLoggedIn && reduxIsLoggedIn) {
       dispatch(clearUser());
     }
-  }, [isLoggedIn, currentUser, reduxUser.isLoggedIn, dispatch, logout]);
+  }, [isLoggedIn, currentUser, reduxIsLoggedIn, dispatch, logout]);
 
   const finalUser =
     currentUser || (reduxUser.name ? { name: reduxUser.name } : null);
 
-  const finalIsLoggedIn = isLoggedIn || reduxUser.isLoggedIn;
+  const finalIsLoggedIn = isLoggedIn || reduxIsLoggedIn;
 
   return {
     isLoggedIn: finalIsLoggedIn,

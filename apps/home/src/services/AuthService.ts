@@ -1,4 +1,4 @@
-import { StorageService } from "./StorageService";
+import { StorageService } from "@repo/ui";
 
 export type User = {
   name: string;
@@ -10,20 +10,18 @@ export class AuthService {
 
   constructor() {
     this.storageService = new StorageService();
-    this.currentUser = this.storageService.getItem<User>(
-      StorageService.AUTH_KEY
-    );
+    this.currentUser = this.storageService.getUserData();
   }
 
   login(user: User, setter: (user: User | null) => void): void {
     this.currentUser = user;
-    this.storageService.setItem(StorageService.AUTH_KEY, user);
+    this.storageService.setUserData(user);
     setter(this.currentUser);
   }
 
   logout(setter: (user: User | null) => void): void {
     this.currentUser = null;
-    this.storageService.removeItem(StorageService.AUTH_KEY);
+    this.storageService.clearUserData();
     setter(this.currentUser);
   }
 
