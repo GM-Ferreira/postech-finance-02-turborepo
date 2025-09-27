@@ -2,18 +2,17 @@
 
 import { useForm, Controller } from "react-hook-form";
 import CurrencyInput from "react-currency-input-field";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useAccount } from "@/context/AccountContext";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   transactionSchema,
   TransactionFormData,
   TransactionFormInput,
 } from "@/lib/schemas/transactionSchema";
 import { transactionSelectOptions } from "@/models/Transaction";
-import { Select } from "@repo/ui/Select";
-import { Button } from "@repo/ui/Button";
+import { Select, Button } from "@repo/ui";
 
 export default function Home() {
   const { addTransaction } = useAccount();
