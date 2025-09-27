@@ -1,8 +1,9 @@
 "use client";
 
 import { SetStateAction, useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { SharedNavigation } from "@repo/ui";
 
 import { useAccount } from "@/context/AccountContext";
 
@@ -12,79 +13,6 @@ import { TransactionDetailModal } from "@/components/modals/TransactionDetailMod
 import { Account } from "@/models/Account";
 import { Transaction, transactionTypeDisplayNames } from "@/models/Transaction";
 import { CurrencyUtils } from "@/lib/utils/CurrencyUtils";
-
-const NavigationSection = () => {
-  const pathname = usePathname();
-  const navLinks = [
-    { href: "/home", label: "Início" },
-    { href: "/investments", label: "Investimentos" },
-    { href: "/cards", label: "Cartões" },
-  ];
-
-  return (
-    <nav
-      className="w-full
-        flex flex-row justify-around items-center py-4
-        lg:flex-col lg:justify-start lg:items-stretch 
-        lg:bg-[#f5f5f5] lg:p-6 lg:rounded-lg lg:gap-2 lg:max-w-44"
-    >
-      {navLinks.map((link) => {
-        const isActive = pathname.startsWith(link.href);
-        if (link.href === "/cards") {
-        return (
-          <a
-            key={link.label}
-            href={link.href}
-            className={`
-                block rounded-lg px-4 py-3 transition-colors
-                self-center
-                ${!isActive ? "md:hover:bg-gray-200 hover:bg-success/50" : ""}
-              `}
-          >
-            <span
-              className={`
-                font-semibold
-                ${
-                  isActive
-                    ? "text-success border-b-2 border-success"
-                    : "text-black"
-                }
-              `}
-            >
-              {link.label}
-            </span>
-          </a>
-        );
-        }
-
-        return (
-          <Link
-            key={link.label}
-            href={link.href}
-            className={`
-                block rounded-lg px-4 py-3 transition-colors
-                self-center
-                ${!isActive ? "md:hover:bg-gray-200 hover:bg-success/50" : ""}
-              `}
-          >
-            <span
-              className={`
-                font-semibold
-                ${
-                  isActive
-                    ? "text-success border-b-2 border-success"
-                    : "text-black"
-                }
-              `}
-            >
-              {link.label}
-            </span>
-          </Link>
-        );
-      })}
-    </nav>
-  );
-};
 
 type GreetinSectionProps = {
   formattedDate: string;
@@ -102,7 +30,7 @@ const GreetingSection: React.FC<GreetinSectionProps> = ({
   showBalance,
   setShowBalance,
   formattedDate,
-} : GreetinSectionProps) => (
+}: GreetinSectionProps) => (
   <div className="bg-primary p-6 rounded-lg min-h-[655px] sm:min-h-[400px]">
     <h1 className="text-3xl font-bold text-secondary">
       Olá, {userName} {`! :)`}
@@ -231,8 +159,8 @@ const StatementSection: React.FC<StatementSectionProps> = ({
     isDeleteModeActive
       ? "bg-warning opacity-50 cursor-default"
       : !isButtonActive
-      ? "bg-gray-400 opacity-50 cursor-default"
-      : "bg-primary cursor-pointer"
+        ? "bg-gray-400 opacity-50 cursor-default"
+        : "bg-primary cursor-pointer"
   }`;
 
   const toggleRemoveMode = () => {
@@ -393,7 +321,7 @@ export default function ProtectedLayout({
       className="container mx-auto p-4 grid grid-cols-1 
       gap-6 lg:min-h-screen lg:grid-cols-[auto_1fr_auto]"
     >
-      <NavigationSection />
+      <SharedNavigation />
 
       <main className="flex flex-col gap-6 w-full">
         <GreetingSection

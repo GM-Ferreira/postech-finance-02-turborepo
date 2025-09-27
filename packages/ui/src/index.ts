@@ -6,6 +6,7 @@ export { Select } from "./Select";
 // Components
 export { SharedHeader } from "./components/SharedHeader";
 export type { SharedHeaderProps } from "./components/SharedHeader";
+export { SharedNavigation } from "./components/SharedNavigation";
 
 // Icons
 export { LogoIcon, AvatarIcon } from "./icons";
