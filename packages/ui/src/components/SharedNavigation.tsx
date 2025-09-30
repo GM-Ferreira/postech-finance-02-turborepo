@@ -23,7 +23,7 @@ export const SharedNavigation = () => {
 
   const isCrossAppNavigation = (linkHref: string) => {
     if (isInInvestmentsApp) {
-      return linkHref === "/home" || linkHref === "/investments";
+      return linkHref === "/home" || linkHref === "/cards";
     } else {
       return linkHref === "/investments";
     }
