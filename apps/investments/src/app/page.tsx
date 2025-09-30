@@ -3,6 +3,7 @@
 import { SharedNavigation } from "@repo/ui";
 
 import InvestmentsHeader from "@/components/layout/Header";
+import { InvestmentChart } from "@/components/charts/InvestmentChart";
 
 export default function InvestmentsPage() {
   return (
@@ -15,7 +16,10 @@ export default function InvestmentsPage() {
             <SharedNavigation />
 
             <main className="space-y-6">
-              <h1 className="text-3xl font-bold text-gray-800">Meus Investimentos</h1>
+              <h1 className="text-3xl font-bold text-gray-800">
+                Meus Investimentos
+              </h1>
+              <InvestmentChart />
             </main>
           </div>
         </div>
