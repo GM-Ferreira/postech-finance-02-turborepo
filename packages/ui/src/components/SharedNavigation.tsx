@@ -11,7 +11,11 @@ export const SharedNavigation = () => {
   const navLinks = [
     { href: "/home", label: "Início", app: "home" as const },
     { href: "/cards", label: "Cartões", app: "home" as const },
-    { href: "/investments", label: "Investimentos", app: "investments" as const },
+    {
+      href: "/investments",
+      label: "Investimentos",
+      app: "investments" as const,
+    },
   ];
 
   const isInInvestmentsApp =
@@ -19,7 +23,7 @@ export const SharedNavigation = () => {
 
   const isCrossAppNavigation = (linkHref: string) => {
     if (isInInvestmentsApp) {
-      return linkHref === "/home";
+      return linkHref === "/home" || linkHref === "/investments";
     } else {
       return linkHref === "/investments";
     }

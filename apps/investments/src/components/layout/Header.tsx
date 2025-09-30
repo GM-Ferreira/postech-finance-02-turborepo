@@ -24,6 +24,7 @@ const useInvestmentsHeaderData = () => {
       window.location.href = "/home";
     },
     onLogout: () => {
+      localStorage.setItem("local-logout-flag", "true");
       dispatch(clearUser());
 
       setTimeout(() => {
