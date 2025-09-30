@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-export default function CardsUnavailable() {
+export default function InvestmentsUnavailable() {
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
 
@@ -12,12 +12,12 @@ export default function CardsUnavailable() {
     setRetryCount(prev => prev + 1);
     
     try {
-      await fetch('http://localhost:3001/cards', { 
+      await fetch('http://localhost:3001/investments', {
         method: 'HEAD',
         mode: 'no-cors' 
       });
-      
-      window.location.href = '/cards';
+
+      window.location.href = '/investments';
     } catch {
       setTimeout(() => {
         setIsRetrying(false);
@@ -41,7 +41,7 @@ export default function CardsUnavailable() {
         </h1>
 
         <p className="text-gray-600 mb-6">
-          O módulo de cartões não está disponível no momento. 
+          O módulo de investimentos não está disponível no momento. 
           Isso pode acontecer se o serviço não estiver rodando ou houver problemas de conectividade.
         </p>
 
@@ -49,8 +49,8 @@ export default function CardsUnavailable() {
         <div className="bg-blue-50 p-4 rounded-lg mb-6 text-sm text-left">
           <p className="font-semibold text-blue-800 mb-2">Informações técnicas:</p>
           <ul className="text-blue-700 space-y-1">
-            <li>• Verifique se o serviço cards está rodando na porta 3001</li>
-            <li>• Execute: <code className="bg-blue-100 px-1 rounded">npm run dev</code> na pasta apps/cards</li>
+            <li>• Verifique se o serviço investments está rodando na porta 3001</li>
+            <li>• Execute: <code className="bg-blue-100 px-1 rounded">npm run dev</code> na pasta apps/investments</li>
             <li>• Tentativas de reconexão: {retryCount}</li>
           </ul>
         </div>

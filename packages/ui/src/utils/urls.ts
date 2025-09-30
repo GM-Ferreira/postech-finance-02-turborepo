@@ -3,16 +3,16 @@ export class UrlUtils {
     return process.env.NEXT_PUBLIC_HOME_URL || "http://localhost:3000";
   }
 
-  static getCardsUrl(): string {
-    return process.env.NEXT_PUBLIC_CARDS_URL || "http://localhost:3001";
+  static getInvestmentsUrl(): string {
+    return process.env.NEXT_PUBLIC_INVESTMENTS_URL || "http://localhost:3001";
   }
 
-  static getAppUrl(app: "home" | "cards"): string {
+  static getAppUrl(app: "home" | "investments"): string {
     switch (app) {
       case "home":
         return this.getHomeUrl();
-      case "cards":
-        return this.getCardsUrl();
+      case "investments":
+        return this.getInvestmentsUrl();
       default:
         return this.getHomeUrl();
     }

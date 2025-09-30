@@ -2,12 +2,12 @@
 
 import { SharedNavigation } from "@repo/ui";
 
-import CardsHeader from "@/components/layout/Header";
+import InvestmentsHeader from "@/components/layout/Header";
 
-export default function CardsPage() {
+export default function InvestmentsPage() {
   return (
     <div className="min-h-screen">
-      <CardsHeader />
+      <InvestmentsHeader />
 
       <div className="p-4">
         <div className="max-w-7xl mx-auto">
@@ -15,7 +15,7 @@ export default function CardsPage() {
             <SharedNavigation />
 
             <main className="space-y-6">
-              <h1 className="text-3xl font-bold text-gray-800">Meus Cartões</h1>
+              <h1 className="text-3xl font-bold text-gray-800">Meus Investimentos</h1>
             </main>
           </div>
         </div>

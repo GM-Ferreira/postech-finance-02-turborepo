@@ -8,7 +8,7 @@ import {
   selectIsLoggedIn,
 } from "@repo/ui";
 
-const useCardsHeaderData = () => {
+const useInvestmentsHeaderData = () => {
   const reduxUser = useAppSelector((state) => state.user);
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const dispatch = useAppDispatch();
@@ -33,10 +33,10 @@ const useCardsHeaderData = () => {
   };
 };
 
-const CardsHeader = () => {
-  const headerData = useCardsHeaderData();
+const InvestmentsHeader = () => {
+  const headerData = useInvestmentsHeaderData();
 
   return <SharedHeader {...headerData} logoHref="/home" />;
 };
 
-export default CardsHeader;
+export default InvestmentsHeader;

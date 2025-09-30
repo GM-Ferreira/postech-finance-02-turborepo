@@ -1,10 +1,10 @@
 "use client";
 
-export default function Investments() {
+export default function Cards() {
   return (
     <>
       <h1 className="text-base font-bold text-black">
-        Conteúdo de investimentos
+        Conteúdo de cartões
       </h1>
     </>
   );

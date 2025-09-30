@@ -1,18 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  basePath: '/cards',
+  basePath: "/investments",
   async rewrites() {
     return [
       {
-        source: '/home/:path*',
-        destination: 'http://localhost:3000/:path*',
+        source: "/home/:path*",
+        destination: "http://localhost:3000/:path*",
       },
       {
-        source: '/investments/:path*',
-        destination: 'http://localhost:3000/investments/:path*',
+        source: "/investments/:path*",
+        destination: "http://localhost:3000/investments/:path*",
       },
-    ]
+    ];
   },
   webpack(config) {
     config.module.rules.push({

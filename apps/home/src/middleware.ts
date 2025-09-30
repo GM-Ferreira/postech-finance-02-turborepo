@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith("/cards")) {
+  if (pathname.startsWith("/investments")) {
     try {
-      const response = await fetch("http://localhost:3001/cards", {
+      const response = await fetch("http://localhost:3001/investments", {
         method: "HEAD",
         headers: {
           Accept: "text/html,application/xhtml+xml,application/xml",
@@ -16,11 +16,11 @@ export async function middleware(request: NextRequest) {
       if (response.ok) {
         return NextResponse.next();
       } else {
-        return NextResponse.rewrite(new URL("/cards-unavailable", request.url));
+        return NextResponse.rewrite(new URL("/investments-unavailable", request.url));
       }
     } catch (error) {
-      console.log("Cards service unavailable:", error);
-      return NextResponse.rewrite(new URL("/cards-unavailable", request.url));
+      console.log("Investments service unavailable:", error);
+      return NextResponse.rewrite(new URL("/investments-unavailable", request.url));
     }
   }
 
@@ -28,5 +28,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/cards/:path*"],
+  matcher: ["/investments/:path*"],
 };

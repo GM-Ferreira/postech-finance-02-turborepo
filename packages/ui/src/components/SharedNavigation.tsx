@@ -10,17 +10,18 @@ export const SharedNavigation = () => {
 
   const navLinks = [
     { href: "/home", label: "Início", app: "home" as const },
-    { href: "/investments", label: "Investimentos", app: "home" as const },
-    { href: "/cards", label: "Cartões", app: "cards" as const },
+    { href: "/cards", label: "Cartões", app: "home" as const },
+    { href: "/investments", label: "Investimentos", app: "investments" as const },
   ];
 
-  const isInCardsApp = pathname === "/" || pathname.startsWith("/cards");
+  const isInInvestmentsApp =
+    pathname === "/" || pathname.startsWith("/investments");
 
   const isCrossAppNavigation = (linkHref: string) => {
-    if (isInCardsApp) {
-      return linkHref === "/home" || linkHref === "/investments";
+    if (isInInvestmentsApp) {
+      return linkHref === "/home";
     } else {
-      return linkHref === "/cards";
+      return linkHref === "/investments";
     }
   };
 
@@ -31,8 +32,8 @@ export const SharedNavigation = () => {
 
     const baseUrl = UrlUtils.getAppUrl(link.app);
 
-    if (link.app === "cards") {
-      return UrlUtils.isProduction() ? baseUrl : `${baseUrl}/cards`;
+    if (link.app === "investments") {
+      return UrlUtils.isProduction() ? baseUrl : `${baseUrl}/investments`;
     }
 
     return `${baseUrl}${link.href}`;
@@ -47,7 +48,7 @@ export const SharedNavigation = () => {
     >
       {navLinks.map((link) => {
         const isActive =
-          isInCardsApp && link.href === "/cards"
+          isInInvestmentsApp && link.href === "/investments"
             ? true
             : pathname.startsWith(link.href);
 
