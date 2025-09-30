@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
-import "./globals.css";
-import { AuthProvider } from "@/context/AuthContext";
-import Header from "@/components/layout/Header";
-import { AccountProvider } from "@/context/AccountContext";
 import { ReduxProvider } from "@repo/ui";
+
+import { AuthProvider } from "@/context/AuthContext";
+import { AccountProvider } from "@/context/AccountContext";
+
+import "./globals.css";
+import Header from "@/components/layout/Header";
 
 const inter = Inter({
   subsets: ["latin"],

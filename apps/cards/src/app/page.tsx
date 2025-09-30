@@ -6,7 +6,7 @@ import CardsHeader from "@/components/layout/Header";
 
 export default function CardsPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <CardsHeader />
 
       <div className="p-4">
@@ -14,7 +14,6 @@ export default function CardsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-6">
             <SharedNavigation />
 
-            {/* // TODO -  Conteúdo Principal de teste */}
             <main className="space-y-6">
               <h1 className="text-3xl font-bold text-gray-800">Meus Cartões</h1>
             </main>
