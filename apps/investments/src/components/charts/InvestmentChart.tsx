@@ -10,29 +10,39 @@ import {
 } from "recharts";
 import { PieSectorDataItem } from "recharts/types/polar/Pie";
 
-const data = [
+interface InvestmentData extends Record<string, unknown> {
+  name: string;
+  value: number;
+  color: string;
+}
+
+const getInvestmentAbbreviation = (name: string): string => {
+  return name
+    .split(" ")
+    .filter((word) => word.length > 0)
+    .map((word) => word.charAt(0).toUpperCase())
+    .join(".");
+};
+
+const data: InvestmentData[] = [
   {
     name: "Fundos de investimento",
     value: 15000,
-    abbreviation: "FI",
     color: "#0088FE",
   },
   {
     name: "Tesouro Direto",
     value: 10000,
-    abbreviation: "TD",
     color: "#8884d8",
   },
   {
     name: "Previdência Privada",
     value: 8000,
-    abbreviation: "PP",
     color: "#FF8042",
   },
   {
     name: "Bolsa de Valores",
     value: 17000,
-    abbreviation: "BV",
     color: "#FFBB28",
   },
 ];
@@ -64,7 +74,7 @@ const renderActiveShape = ({
   return (
     <g>
       <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>
-        {payload.abbreviation}
+        {getInvestmentAbbreviation(payload.name)}
       </text>
       <Sector
         cx={cx}
