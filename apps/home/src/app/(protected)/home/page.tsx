@@ -115,6 +115,7 @@ export default function Home() {
             control={control}
             render={({ field }) => (
               <input
+                id="date"
                 type="date"
                 {...field}
                 className={`mt-1 block w-full max-w-96 rounded-md border 

@@ -10,7 +10,7 @@ export async function middleware(request: NextRequest) {
         headers: {
           Accept: "text/html,application/xhtml+xml,application/xml",
         },
-        signal: AbortSignal.timeout(3000),
+        signal: AbortSignal.timeout(5000),
       });
 
       if (response.ok) {
