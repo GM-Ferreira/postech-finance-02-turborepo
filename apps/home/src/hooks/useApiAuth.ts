@@ -100,7 +100,7 @@ export const useApiAuth = () => {
     }
   }, [authService]);
 
-  return {
+  return useMemo(() => ({
     register,
     login,
     logout,
@@ -109,5 +109,14 @@ export const useApiAuth = () => {
     getAuthToken,
     getUserAccount,
     isLoading,
-  };
+  }), [
+    register,
+    login,
+    logout,
+    isAuthenticated,
+    getCurrentUser,
+    getAuthToken,
+    getUserAccount,
+    isLoading,
+  ]);
 };

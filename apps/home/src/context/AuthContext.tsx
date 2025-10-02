@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email: userData.email,
       });
     }
-  }, []);
+  }, [apiAuth]);
 
   const login = async (credentials: {
     email: string;
