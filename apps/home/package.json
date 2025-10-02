@@ -8,10 +8,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint --max-warnings 0",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "clean": "rm -rf .next .turbo node_modules/.cache"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
+    "@repo/api": "*",
     "@repo/ui": "*",
     "bowser": "^2.11.0",
     "next": "^15.5.0",

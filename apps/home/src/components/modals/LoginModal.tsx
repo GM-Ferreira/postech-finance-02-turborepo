@@ -4,12 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-import { useAuth } from "@/hooks/useAuth";
+import { Input } from "@repo/ui/Input";
+import { Modal } from "@repo/ui/Modal";
 
 import bannerLogin from "@/assets/banners/banner-login.png";
-import { User } from "@/services/AuthService";
-import { Modal } from "@repo/ui/Modal";
-import { Input } from "@repo/ui/Input";
+import { useAuth } from "@/hooks/useAuth";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -21,24 +20,30 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   onClose,
 }: LoginModalProps) => {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, isLoading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
 
     if (email && password) {
-      const name = email.split("@")[0] ?? "";
-      const userToLogin: User = { name, email };
+      try {
+        const success = await login({ email, password });
 
-      login(userToLogin);
-      onClose();
-
-      router.replace("/home");
+        if (success) {
+          onClose();
+          router.replace("/home");
+        } else {
+          setError("Credenciais inválidas. Tente novamente.");
+        }
+      } catch (error) {
+        setError("Erro ao fazer login. Tente novamente.");
+        console.error("Login error:", error);
+      }
     } else {
       setError("Por favor, preencha ambos os campos.");
     }
@@ -64,6 +69,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               placeholder="seu@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
             />
           </label>
 
@@ -74,6 +80,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               placeholder="Sua senha"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
             />
           </label>
 
@@ -82,9 +89,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           <div className="flex w-full justify-center p-4 mt-6">
             <button
               type="submit"
-              className="w-36 h-12 rounded-md bg-success py-2 text-white hover:bg-black"
+              className="w-36 h-12 rounded-md bg-success py-2 text-white
+                hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading}
             >
-              Entrar
+              {isLoading ? "Entrando..." : "Entrar"}
             </button>
           </div>
         </form>

@@ -1,6 +1,7 @@
-import { configureStore } from '@reduxjs/toolkit';
-import userReducer from './userSlice';
-import { localStorageMiddleware } from './middleware';
+import { configureStore } from "@reduxjs/toolkit";
+
+import userReducer from "./userSlice";
+import { localStorageMiddleware } from "./middleware";
 
 export const store = configureStore({
   reducer: {
@@ -9,7 +10,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['persist/PERSIST'],
+        ignoredActions: ["persist/PERSIST"],
       },
     }).concat(localStorageMiddleware.middleware),
 });

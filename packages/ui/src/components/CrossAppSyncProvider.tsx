@@ -21,6 +21,7 @@ export const CrossAppSyncProvider = ({
   const dispatch = useAppDispatch();
   const isUpdatingFromExternalRef = useRef(false);
   const isHydrated = useHydration();
+  const storageService = useRef(new StorageService()).current;
 
   useEffect(() => {
     if (typeof window === "undefined" || !isHydrated) return;
@@ -50,11 +51,11 @@ export const CrossAppSyncProvider = ({
             isUpdatingFromExternalRef.current = false;
           }, 100);
         } else {
-          const isLocalLogout = localStorage.getItem("local-logout-flag");
-          if (isLocalLogout === "true") {
-            localStorage.removeItem("local-logout-flag");
+          const hasLocalLogout = storageService.hasLocalLogoutFlag();
+          if (hasLocalLogout) {
+            storageService.clearLocalLogoutFlag();
           } else {
-            localStorage.setItem("external-logout-flag", "true");
+            storageService.setExternalLogoutFlag();
           }
         }
       }
@@ -72,7 +73,7 @@ export const CrossAppSyncProvider = ({
         handleUserStateChange as EventListener
       );
     };
-  }, [dispatch]);
+  }, [dispatch, storageService]);
 
   return <>{children}</>;
 };

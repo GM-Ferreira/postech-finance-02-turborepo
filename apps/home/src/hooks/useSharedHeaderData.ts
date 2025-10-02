@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -9,6 +9,7 @@ import {
   clearUser,
   useAppDispatch,
   selectIsLoggedIn,
+  StorageService,
 } from "@repo/ui";
 
 export const useSharedHeaderData = () => {
@@ -17,12 +18,13 @@ export const useSharedHeaderData = () => {
   const reduxUser = useAppSelector((state) => state.user);
   const reduxIsLoggedIn = useAppSelector(selectIsLoggedIn);
   const dispatch = useAppDispatch();
+  const storageService = useMemo(() => new StorageService(), []);
 
   useEffect(() => {
-    const externalLogout = localStorage.getItem("external-logout-flag");
+    const hasExternalLogout = storageService.hasExternalLogoutFlag();
 
-    if (externalLogout === "true" && isLoggedIn) {
-      localStorage.removeItem("external-logout-flag");
+    if (hasExternalLogout && isLoggedIn) {
+      storageService.clearExternalLogoutFlag();
       logout();
       return;
     }
@@ -37,7 +39,7 @@ export const useSharedHeaderData = () => {
     } else if (!isLoggedIn && reduxIsLoggedIn) {
       dispatch(clearUser());
     }
-  }, [isLoggedIn, currentUser, reduxIsLoggedIn, dispatch, logout]);
+  }, [isLoggedIn, currentUser, reduxIsLoggedIn, dispatch, logout, storageService]);
 
   const finalUser =
     currentUser || (reduxUser.name ? { name: reduxUser.name } : null);
@@ -51,7 +53,7 @@ export const useSharedHeaderData = () => {
     onLogin: () => {},
     onSignUp: () => {},
     onLogout: () => {
-      localStorage.setItem("local-logout-flag", "true");
+      storageService.setLocalLogoutFlag();
       logout();
       dispatch(clearUser());
     },

@@ -1,15 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-import { useAuth } from "@/hooks/useAuth";
-
-import bannerSignUp from "@/assets/banners/banner-signup.png";
-import { RegistrationService } from "@/services/RegistrationService";
 import { Modal } from "@repo/ui/Modal";
 import { Input } from "@repo/ui/Input";
+
+import { useAuth } from "@/hooks/useAuth";
+import bannerSignUp from "@/assets/banners/banner-signup.png";
 
 interface SignUpModalProps {
   isOpen: boolean;
@@ -21,43 +20,44 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   onClose,
 }: SignUpModalProps) => {
   const router = useRouter();
-  const { login } = useAuth();
-  const registrationService = useMemo(() => new RegistrationService(), []);
+  const { register, isLoading } = useAuth();
 
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [newUser, setNewUser] = useState(registrationService.user);
-  const [isTermsChecked, setIsTermsChecked] = useState(
-    registrationService.termsAccepted
-  );
+  const [newUser, setNewUser] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+  const [isTermsChecked, setIsTermsChecked] = useState(false);
 
   const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsLoading(true);
     setError(null);
 
+    if (!newUser.username || !newUser.email || !newUser.password) {
+      setError("Todos os campos são obrigatórios.");
+      return;
+    }
+
+    if (!isTermsChecked) {
+      setError("Você deve aceitar os termos e condições.");
+      return;
+    }
+
     try {
-      await registrationService.submit();
+      const success = await register(newUser);
 
-      login(newUser);
-
-      alert(`Conta para ${newUser.name} criada com sucesso!`);
-      onClose();
-
-      router.replace("/home");
+      if (success) {
+        alert(`Conta para ${newUser.username} criada com sucesso!`);
+        onClose();
+        router.replace("/home");
+      } else {
+        setError("Não foi possível criar a conta. Tente novamente.");
+      }
     } catch (err: unknown) {
       console.error("Erro no cadastro:", err);
-
-      let errorMessage = "Não foi possível criar a conta. Tente novamente.";
-
-      if (typeof err === "object" && err !== null && "message" in err) {
-        errorMessage = String((err as { message: unknown }).message);
-      }
-
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
+      setError("Erro inesperado. Tente novamente.");
     }
   };
 
@@ -74,7 +74,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
         </div>
 
         <p className="text-black text-xl font-bold">
-          Preencha os campos abaixo para criar sua conta corrente!
+          Preencha os campos abaixo para criar sua conta!
         </p>
 
         <form className="mt-6 w-full text-left" onSubmit={handleSignUp}>
@@ -83,14 +83,11 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
             <Input
               type="text"
               placeholder="Digite seu nome completo"
-              value={newUser.name}
+              value={newUser.username}
               onChange={(e) =>
-                registrationService.updateField(
-                  "name",
-                  e.target.value,
-                  setNewUser
-                )
+                setNewUser({ ...newUser, username: e.target.value })
               }
+              disabled={isLoading}
             />
           </label>
 
@@ -101,12 +98,9 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
               placeholder="Digite seu email"
               value={newUser.email}
               onChange={(e) =>
-                registrationService.updateField(
-                  "email",
-                  e.target.value,
-                  setNewUser
-                )
+                setNewUser({ ...newUser, email: e.target.value })
               }
+              disabled={isLoading}
             />
           </label>
 
@@ -117,12 +111,9 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
               placeholder="Digite sua senha"
               value={newUser.password}
               onChange={(e) =>
-                registrationService.updateField(
-                  "password",
-                  e.target.value,
-                  setNewUser
-                )
+                setNewUser({ ...newUser, password: e.target.value })
               }
+              disabled={isLoading}
             />
             <span
               onClick={() => setShowPassword(!showPassword)}
@@ -138,9 +129,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 type="checkbox"
                 className="w-full h-full"
                 checked={isTermsChecked}
-                onChange={() =>
-                  registrationService.toggleTerms(setIsTermsChecked)
-                }
+                onChange={(e) => setIsTermsChecked(e.target.checked)}
               />
             </div>
             <p className="text-zinc-500 ml-4">

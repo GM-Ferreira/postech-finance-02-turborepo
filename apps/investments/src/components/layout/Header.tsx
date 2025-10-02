@@ -1,6 +1,6 @@
 "use client";
 
-import { SharedHeader } from "@repo/ui";
+import { SharedHeader, StorageService } from "@repo/ui";
 import {
   useAppSelector,
   clearUser,
@@ -12,6 +12,7 @@ const useInvestmentsHeaderData = () => {
   const reduxUser = useAppSelector((state) => state.user);
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const dispatch = useAppDispatch();
+  const storageService = new StorageService();
 
   return {
     isLoggedIn,
@@ -24,7 +25,8 @@ const useInvestmentsHeaderData = () => {
       window.location.href = "/home";
     },
     onLogout: () => {
-      localStorage.setItem("local-logout-flag", "true");
+      storageService.setLocalLogoutFlag();
+      storageService.clearAllUserData();
       dispatch(clearUser());
 
       setTimeout(() => {

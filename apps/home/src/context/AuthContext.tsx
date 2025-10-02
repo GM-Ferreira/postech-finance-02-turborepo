@@ -1,15 +1,25 @@
 "use client";
 
-import { createContext, useState, useMemo, ReactNode, useEffect } from "react";
+import { createContext, useState, ReactNode, useEffect } from "react";
 
-import { AuthService, User } from "@/services/AuthService";
+import { useApiAuth } from "@/hooks/useApiAuth";
 import { StringUtils } from "@/lib/utils/StringUtils";
+
+type User = {
+  name: string;
+  email: string;
+};
 
 type AuthContextType = {
   isLoading: boolean;
   isLoggedIn: boolean;
   currentUser: User | null;
-  login: (user: User) => void;
+  login: (credentials: { email: string; password: string }) => Promise<boolean>;
+  register: (userData: {
+    username: string;
+    email: string;
+    password: string;
+  }) => Promise<boolean>;
   logout: () => void;
 };
 
@@ -18,37 +28,72 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 );
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const authService = useMemo(() => new AuthService(), []);
+  const apiAuth = useApiAuth();
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<User | null>(
-    authService.currentUser
-  );
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const user = authService.currentUser;
+    const userData = apiAuth.getCurrentUser();
 
-    if (user) {
-      user.name = StringUtils.toPascalCase(currentUser?.name ?? "");
+    if (userData && apiAuth.isAuthenticated()) {
+      setCurrentUser({
+        name: StringUtils.toPascalCase(userData.name),
+        email: userData.email,
+      });
+    }
+  }, []);
+
+  const login = async (credentials: {
+    email: string;
+    password: string;
+  }): Promise<boolean> => {
+    const response = await apiAuth.login(credentials);
+
+    if (response.data?.result?.token) {
+      const userData = apiAuth.getCurrentUser();
+
+      if (userData) {
+        setCurrentUser({
+          name: StringUtils.toPascalCase(userData.name),
+          email: userData.email,
+        });
+      }
+      return true;
     }
 
-    setCurrentUser(user);
-    setIsLoading(false);
-  }, [authService, currentUser?.name]);
+    return false;
+  };
 
-  const login = (user: User) => {
-    authService.login(user, setCurrentUser);
+  const register = async (userData: {
+    username: string;
+    email: string;
+    password: string;
+  }): Promise<boolean> => {
+    const response = await apiAuth.register(userData);
+
+    if (response.data) {
+      const loginSuccess = await login({
+        email: userData.email,
+        password: userData.password,
+      });
+
+      return loginSuccess;
+    }
+
+    return false;
   };
 
   const logout = () => {
-    authService.logout(setCurrentUser);
+    apiAuth.logout();
+    setCurrentUser(null);
   };
 
   const value = {
-    isLoading,
-    isLoggedIn: currentUser !== null,
+    isLoading: apiAuth.isLoading,
+    isLoggedIn: currentUser !== null && apiAuth.isAuthenticated(),
     currentUser,
     login,
+    register,
     logout,
   };
 
