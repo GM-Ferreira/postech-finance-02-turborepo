@@ -87,3 +87,71 @@ export interface GetUserAccountResponse {
     ];
   };
 }
+
+// Transaction related types
+
+export type TransactionType = "Deposit" | "Transfer" | "Payment";
+
+export const transactionTypeDisplayNames: { [key in TransactionType]: string } =
+  {
+    Deposit: "Depósito",
+    Transfer: "Transferência",
+    Payment: "Pagamento",
+  };
+
+export const transactionSelectOptions = [
+  { value: "Deposit", label: "Depósito" },
+  { value: "Transfer", label: "Transferência" },
+  { value: "Payment", label: "Pagamento" },
+];
+
+export interface Transaction {
+  id: string;
+  accountId: string;
+  type: TransactionType;
+  value: number;
+  date: string;
+  description?: string;
+}
+
+export interface GetTransactionsResponse {
+  message: string;
+  result: {
+    transactions: Transaction[];
+  };
+}
+
+export interface CreateTransactionRequest {
+  accountId: string;
+  type: TransactionType;
+  value: number;
+  description?: string;
+}
+
+export interface CreateTransactionResponse {
+  message: string;
+  result: {
+    transaction: Transaction;
+  };
+}
+
+export interface UpdateTransactionRequest {
+  type?: TransactionType;
+  value?: number;
+  description?: string;
+}
+
+export interface UpdateTransactionResponse {
+  message: string;
+  result: {
+    transaction: Transaction;
+  };
+}
+
+export interface DeleteTransactionResponse {
+  message: string;
+  result: {
+    deleted: boolean;
+    transactionId: string;
+  };
+}

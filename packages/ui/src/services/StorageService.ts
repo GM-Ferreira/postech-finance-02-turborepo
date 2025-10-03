@@ -41,12 +41,20 @@ export class StorageService {
     window.localStorage.removeItem(key);
   }
 
-  public setUserData(userData: { name: string; email: string }): void {
+  public setUserData(userData: {
+    name: string;
+    email: string;
+    accountId: string;
+  }): void {
     this.setItem(StorageService.USER_DATA_KEY, userData);
   }
 
-  public getUserData(): { name: string; email: string } | null {
-    return this.getItem<{ name: string; email: string }>(
+  public getUserData(): {
+    name: string;
+    email: string;
+    accountId: string;
+  } | null {
+    return this.getItem<{ name: string; email: string; accountId: string }>(
       StorageService.USER_DATA_KEY
     );
   }

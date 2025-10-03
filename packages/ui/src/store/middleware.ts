@@ -42,13 +42,15 @@ localStorageMiddleware.startListening({
         const currentState = listenerApi.getState() as { user: UserState };
         const userState = currentState.user;
 
-        storage.setUserData(userState);
+        if (userState.name && userState.email && userState.accountId) {
+          storage.setUserData(userState);
 
-        window.dispatchEvent(
-          new CustomEvent("@bytebank/user-changed", {
-            detail: userState,
-          })
-        );
+          window.dispatchEvent(
+            new CustomEvent("@bytebank/user-changed", {
+              detail: userState,
+            })
+          );
+        }
       }
     }
   },
