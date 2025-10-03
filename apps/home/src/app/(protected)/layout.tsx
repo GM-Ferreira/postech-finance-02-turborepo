@@ -297,7 +297,7 @@ const StatementSection: React.FC<StatementSectionProps> = ({
         visibleCount < transactions.length && (
           <div
             onClick={loadMoreTransaction}
-            className="flex justify-center mt-4 border border-gray-300 rounded-lg py-2"
+            className="flex justify-center mt-4 border border-gray-300 rounded-lg py-2 cursor-pointer hover:bg-gray-50"
           >
             <p className="text-success">Carregar mais itens</p>
           </div>
@@ -340,7 +340,11 @@ export default function ProtectedLayout({
   }, [isLoading, isLoggedIn, router]);
 
   const visibleTransactions = useMemo(() => {
-    return transactions.slice(0, visibleCount);
+    const sortedTransactions = [...transactions].sort((a, b) => {
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+
+    return sortedTransactions.slice(0, visibleCount);
   }, [transactions, visibleCount]);
 
   const loadMoreTransaction = () => {
