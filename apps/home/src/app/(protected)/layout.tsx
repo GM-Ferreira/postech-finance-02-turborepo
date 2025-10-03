@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 import { SharedNavigation } from "@repo/ui";
@@ -9,7 +9,11 @@ import { Transaction, transactionTypeDisplayNames } from "@repo/api";
 import { useTransactionsContext } from "@/context/TransactionsContext";
 
 import { TransactionDetailModal } from "@/components/modals/TransactionDetailModal";
-import { EyeIcon, EyeOffIcon, TrashIcon } from "@/components/icons";
+import {
+  TransactionFilterModal,
+  TransactionFilters,
+} from "@/components/modals/TransactionFilterModal";
+import { EyeIcon, EyeOffIcon, TrashIcon, FilterIcon } from "@/components/icons";
 import { useAuth } from "@/hooks/useAuth";
 import { CurrencyUtils } from "@/lib/utils/CurrencyUtils";
 
@@ -174,20 +178,24 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
 
 type StatementSectionProps = {
   visibleTransactions: Transaction[];
-  transactions: Transaction[];
+  totalFilteredTransactions: number;
   visibleCount: number;
   loadMoreTransaction: () => void;
   deleteTransactions: (idsToDelete: string[]) => Promise<void>;
   onOpenTransactionDetails: (transactionId: string) => void;
+  hasActiveFilters: boolean;
+  onOpenFilterModal: () => void;
 };
 
 const StatementSection: React.FC<StatementSectionProps> = ({
   visibleTransactions,
-  transactions,
+  totalFilteredTransactions,
   visibleCount,
   loadMoreTransaction,
   deleteTransactions,
   onOpenTransactionDetails,
+  hasActiveFilters,
+  onOpenFilterModal,
 }: StatementSectionProps) => {
   const [isDeleteModeActive, setIsDeleteModeActive] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set<string>());
@@ -250,13 +258,34 @@ const StatementSection: React.FC<StatementSectionProps> = ({
   return (
     <aside className="w-full bg-[#f5f5f5] p-6 rounded-lg md:min-w-72">
       <div className="flex justify-between items-center mb-4">
-        <p className="text-black text-xl font-bold">Extrato</p>
+        <div className="flex items-center gap-2">
+          <p className="text-black text-xl font-bold">Extrato</p>
+          {hasActiveFilters && (
+            <span className="bg-primary text-white text-xs px-2 py-1 rounded-full">
+              Filtrado
+            </span>
+          )}
+        </div>
 
-        <div
-          onClick={isButtonActive ? toggleRemoveMode : undefined}
-          className={trashIconClass}
-        >
-          <TrashIcon className="text-white" size={20} />
+        <div className="flex items-center gap-2">
+          <div
+            onClick={onOpenFilterModal}
+            className={`flex items-center justify-center rounded-full p-2 cursor-pointer transition-colors ${
+              hasActiveFilters
+                ? "bg-primary hover:bg-primary/90"
+                : "bg-gray-500 hover:bg-gray-600"
+            }`}
+            title="Filtrar transações"
+          >
+            <FilterIcon className="text-white" size={18} />
+          </div>
+
+          <div
+            onClick={isButtonActive ? toggleRemoveMode : undefined}
+            className={trashIconClass}
+          >
+            <TrashIcon className="text-white" size={20} />
+          </div>
         </div>
       </div>
 
@@ -293,8 +322,8 @@ const StatementSection: React.FC<StatementSectionProps> = ({
       })}
 
       {!isDeleteModeActive &&
-        transactions.length > 0 &&
-        visibleCount < transactions.length && (
+        totalFilteredTransactions > 0 &&
+        visibleCount < totalFilteredTransactions && (
           <div
             onClick={loadMoreTransaction}
             className="flex justify-center mt-4 border border-gray-300 rounded-lg py-2 cursor-pointer hover:bg-gray-50"
@@ -326,6 +355,8 @@ export default function ProtectedLayout({
   const [selectedTransactionId, setSelectedTransactionId] = useState<
     string | null
   >(null);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<TransactionFilters>({});
 
   const router = useRouter();
 
@@ -339,13 +370,69 @@ export default function ProtectedLayout({
     }
   }, [isLoading, isLoggedIn, router]);
 
+  const applyFilters = useCallback(
+    (transactions: Transaction[], filters: TransactionFilters) => {
+      return transactions.filter((transaction) => {
+        if (filters.type && transaction.type !== filters.type) {
+          return false;
+        }
+
+        if (filters.startDate) {
+          const transactionDate = new Date(transaction.date);
+          const startDate = new Date(filters.startDate);
+          if (transactionDate < startDate) {
+            return false;
+          }
+        }
+
+        if (filters.endDate) {
+          const transactionDate = new Date(transaction.date);
+          const endDate = new Date(filters.endDate);
+          endDate.setDate(endDate.getDate() + 1);
+          if (transactionDate >= endDate) {
+            return false;
+          }
+        }
+
+        if (
+          filters.minValue !== undefined &&
+          Math.abs(transaction.value) < filters.minValue
+        ) {
+          return false;
+        }
+
+        if (
+          filters.maxValue !== undefined &&
+          Math.abs(transaction.value) > filters.maxValue
+        ) {
+          return false;
+        }
+
+        return true;
+      });
+    },
+    []
+  );
+
   const visibleTransactions = useMemo(() => {
     const sortedTransactions = [...transactions].sort((a, b) => {
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     });
 
-    return sortedTransactions.slice(0, visibleCount);
-  }, [transactions, visibleCount]);
+    const filteredTransactions = applyFilters(
+      sortedTransactions,
+      activeFilters
+    );
+
+    return filteredTransactions.slice(0, visibleCount);
+  }, [transactions, visibleCount, activeFilters, applyFilters]);
+
+  const totalFilteredTransactions = useMemo(() => {
+    const sortedTransactions = [...transactions].sort((a, b) => {
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+    return applyFilters(sortedTransactions, activeFilters).length;
+  }, [transactions, activeFilters, applyFilters]);
 
   const loadMoreTransaction = () => {
     setVisibleCount((prevCount) => prevCount + 10);
@@ -360,6 +447,15 @@ export default function ProtectedLayout({
     setIsDetailModalOpen(false);
     setSelectedTransactionId(null);
   };
+
+  const handleApplyFilters = (filters: TransactionFilters) => {
+    setActiveFilters(filters);
+    setVisibleCount(10);
+  };
+
+  const hasActiveFilters = Object.keys(activeFilters).some(
+    (key) => activeFilters[key as keyof TransactionFilters] !== undefined
+  );
 
   if (isLoading) {
     return (
@@ -399,12 +495,14 @@ export default function ProtectedLayout({
         <StatementSkeleton />
       ) : (
         <StatementSection
-          transactions={transactions}
-          loadMoreTransaction={loadMoreTransaction}
-          visibleCount={visibleCount}
           visibleTransactions={visibleTransactions}
+          totalFilteredTransactions={totalFilteredTransactions}
+          visibleCount={visibleCount}
+          loadMoreTransaction={loadMoreTransaction}
           deleteTransactions={deleteTransactions}
           onOpenTransactionDetails={handleOpenDetails}
+          hasActiveFilters={hasActiveFilters}
+          onOpenFilterModal={() => setIsFilterModalOpen(true)}
         />
       )}
 
@@ -412,6 +510,13 @@ export default function ProtectedLayout({
         isOpen={isDetailModalOpen}
         onClose={handleCloseDetails}
         transactionId={selectedTransactionId}
+      />
+
+      <TransactionFilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        onApplyFilters={handleApplyFilters}
+        currentFilters={activeFilters}
       />
     </div>
   );
