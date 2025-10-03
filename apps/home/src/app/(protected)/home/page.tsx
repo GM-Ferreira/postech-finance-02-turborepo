@@ -4,18 +4,18 @@ import { useForm, Controller } from "react-hook-form";
 import CurrencyInput from "react-currency-input-field";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useAccount } from "@/context/AccountContext";
+import { transactionSelectOptions } from "@repo/api";
+import { Select, Button } from "@repo/ui";
 
 import {
   transactionSchema,
   TransactionFormData,
   TransactionFormInput,
 } from "@/lib/schemas/transactionSchema";
-import { transactionSelectOptions } from "@/models/Transaction";
-import { Select, Button } from "@repo/ui";
+import { useTransactionsContext } from "@/context/TransactionsContext";
 
 export default function Home() {
-  const { addTransaction } = useAccount();
+  const { addTransaction, isLoading } = useTransactionsContext();
 
   const {
     handleSubmit,
@@ -32,13 +32,19 @@ export default function Home() {
     },
   });
 
-  const onSubmit = (data: TransactionFormData) => {
+  // TODO - Ajustar método que faz o add e adicionar loading
+  const onSubmit = async (data: TransactionFormData) => {
     const amountAsNumber = parseFloat(data.amount.replace(",", "."));
 
-    addTransaction(data.type, amountAsNumber, data.date);
+    try {
+      await addTransaction(data.type, amountAsNumber, data.date);
 
-    alert("Transação adicionada com sucesso!");
-    reset();
+      alert("Transação adicionada com sucesso!");
+      reset();
+    } catch (error) {
+      console.error("Erro ao adicionar transação:", error);
+      alert("Erro ao adicionar transação. Tente novamente.");
+    }
   };
 
   return (
@@ -57,6 +63,7 @@ export default function Home() {
                 placeholder="Selecione o tipo de transação"
                 options={transactionSelectOptions}
                 className={`max-w-96 ${errors.type && "border-warning"}`}
+                disabled={isLoading}
               />
             )}
           />
@@ -80,6 +87,7 @@ export default function Home() {
               <CurrencyInput
                 id="amount"
                 name={field.name}
+                disabled={isLoading}
                 value={field.value}
                 ref={field.ref}
                 onBlur={field.onBlur}
@@ -117,6 +125,7 @@ export default function Home() {
               <input
                 id="date"
                 type="date"
+                disabled={isLoading}
                 {...field}
                 className={`mt-1 block w-full max-w-96 rounded-md border 
                   shadow-sm h-12 px-4 bg-white text-zinc-500 
@@ -130,7 +139,9 @@ export default function Home() {
         </div>
 
         <div className="pt-4">
-          <Button type="submit">Adicionar transação</Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Adicionando..." : "Adicionar transação"}
+          </Button>
         </div>
       </form>
     </div>

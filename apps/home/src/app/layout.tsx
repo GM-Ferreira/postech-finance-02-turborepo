@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 import { ReduxProvider } from "@repo/ui";
 
 import { AuthProvider } from "@/context/AuthContext";
-import { AccountProvider } from "@/context/AccountContext";
+import { TransactionsProvider } from "@/context/TransactionsContext";
 
 import "./globals.css";
 import Header from "@/components/layout/Header";
@@ -29,10 +29,10 @@ export default function RootLayout({
       <body className={`${inter.variable}`}>
         <ReduxProvider>
           <AuthProvider>
-            <AccountProvider>
+            <TransactionsProvider>
               <Header />
               {children}
-            </AccountProvider>
+            </TransactionsProvider>
           </AuthProvider>
         </ReduxProvider>
       </body>

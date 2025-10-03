@@ -1,30 +1,29 @@
 "use client";
 
-import { SetStateAction, useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
 import { SharedNavigation } from "@repo/ui";
+import { Transaction, transactionTypeDisplayNames } from "@repo/api";
 
-import { useAccount } from "@/context/AccountContext";
+import { useTransactionsContext } from "@/context/TransactionsContext";
 
-import { useAuth } from "@/hooks/useAuth";
-import { EyeIcon, EyeOffIcon, TrashIcon } from "@/components/icons";
 import { TransactionDetailModal } from "@/components/modals/TransactionDetailModal";
-import { Account } from "@/models/Account";
-import { Transaction, transactionTypeDisplayNames } from "@/models/Transaction";
+import { EyeIcon, EyeOffIcon, TrashIcon } from "@/components/icons";
+import { useAuth } from "@/hooks/useAuth";
 import { CurrencyUtils } from "@/lib/utils/CurrencyUtils";
 
 type GreetinSectionProps = {
   formattedDate: string;
   weekDay: string;
   userName: string;
-  account: Account | null;
+  balance: number;
   showBalance: boolean;
-  setShowBalance: (value: SetStateAction<boolean>) => void;
+  setShowBalance: (value: boolean) => void;
 };
 
 const GreetingSection: React.FC<GreetinSectionProps> = ({
-  account,
+  balance,
   weekDay,
   userName,
   showBalance,
@@ -39,36 +38,30 @@ const GreetingSection: React.FC<GreetinSectionProps> = ({
     <p className="mt-6  text-secondary">
       {weekDay}, {formattedDate}
     </p>
-    {account ? (
-      <div className="flex justify-end mt-6 pr-6">
-        <div className="max-w-80 min-w-40">
-          <div className="flex flex-row gap-6 items-center pb-2 mb-3 pr-9 border-b border-white xl:border-warning">
-            <p className="text-secondary">Saldo</p>
-            {showBalance ? (
-              <EyeIcon
-                className="xl:text-warning text-white"
-                onClick={() => setShowBalance(!showBalance)}
-              />
-            ) : (
-              <EyeOffIcon
-                className="xl:text-warning text-white"
-                onClick={() => setShowBalance(!showBalance)}
-              />
-            )}
-          </div>
-
-          <p className="text-secondary">Conta corrente</p>
-
-          <p className="text-secondary text-2xl font-light">
-            {showBalance
-              ? CurrencyUtils.formatBRL(account.balance)
-              : "R$ ******"}
-          </p>
+    <div className="flex justify-end mt-6 pr-6">
+      <div className="max-w-80 min-w-40">
+        <div className="flex flex-row gap-6 items-center pb-2 mb-3 pr-9 border-b border-white xl:border-warning">
+          <p className="text-secondary">Saldo</p>
+          {showBalance ? (
+            <EyeIcon
+              className="xl:text-warning text-white"
+              onClick={() => setShowBalance(!showBalance)}
+            />
+          ) : (
+            <EyeOffIcon
+              className="xl:text-warning text-white"
+              onClick={() => setShowBalance(!showBalance)}
+            />
+          )}
         </div>
+
+        <p className="text-secondary">Conta corrente</p>
+
+        <p className="text-secondary text-2xl font-light">
+          {showBalance ? CurrencyUtils.formatBRL(balance) : "R$ ******"}
+        </p>
       </div>
-    ) : (
-      <p>Carregando ...</p>
-    )}
+    </div>
   </div>
 );
 
@@ -112,18 +105,21 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
       <div className="flex flex-grow justify-between items-center">
         <div>
           <p className="text-sm text-success font-semibold">
-            {transaction.date.toLocaleDateString("pt-BR", { month: "long" })}
+            {new Date(transaction.date).toLocaleDateString("pt-BR", {
+              month: "long",
+            })}
           </p>
           <p className="text-black">
-            {transactionTypeDisplayNames[transaction.type]}
+            {transactionTypeDisplayNames[transaction.type] ??
+              "Tipo Desconhecido"}
           </p>
           <p className="font-bold text-black">
-            {CurrencyUtils.formatBRL(transaction.amount)}
+            {CurrencyUtils.formatBRL(transaction.value)}
           </p>
         </div>
         <div className="text-right">
           <p className="text-sm text-gray-500">
-            {transaction.date.toLocaleDateString("pt-BR")}
+            {new Date(transaction.date).toLocaleDateString("pt-BR")}
           </p>
         </div>
       </div>
@@ -132,8 +128,8 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
 };
 
 type StatementSectionProps = {
-  visibleTransactions: Transaction[] | undefined;
-  account: Account | null;
+  visibleTransactions: Transaction[];
+  transactions: Transaction[];
   visibleCount: number;
   loadMoreTransaction: () => void;
   deleteTransactions: (idsToDelete: string[]) => void;
@@ -142,7 +138,7 @@ type StatementSectionProps = {
 
 const StatementSection: React.FC<StatementSectionProps> = ({
   visibleTransactions,
-  account,
+  transactions,
   visibleCount,
   loadMoreTransaction,
   deleteTransactions,
@@ -252,8 +248,8 @@ const StatementSection: React.FC<StatementSectionProps> = ({
       })}
 
       {!isDeleteModeActive &&
-        account?.transactions &&
-        visibleCount < account.transactions.length && (
+        transactions.length > 0 &&
+        visibleCount < transactions.length && (
           <div
             onClick={loadMoreTransaction}
             className="flex justify-center mt-4 border border-gray-300 rounded-lg py-2"
@@ -265,14 +261,20 @@ const StatementSection: React.FC<StatementSectionProps> = ({
   );
 };
 
+// TODO - Adicionar loading para a chamada inicial dos valores de balance e transactions
 export default function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const { isLoggedIn, isLoading, currentUser } = useAuth();
-  const { account, showBalance, setShowBalance, deleteTransactions } =
-    useAccount();
+  const {
+    transactions,
+    balance,
+    showBalance,
+    setShowBalance,
+    deleteTransactions,
+  } = useTransactionsContext();
 
   const [visibleCount, setVisibleCount] = useState(10);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -292,7 +294,9 @@ export default function ProtectedLayout({
     }
   }, [isLoading, isLoggedIn, router]);
 
-  const visibleTransactions = account?.transactions.slice(0, visibleCount);
+  const visibleTransactions = useMemo(() => {
+    return transactions.slice(0, visibleCount);
+  }, [transactions, visibleCount]);
 
   const loadMoreTransaction = () => {
     setVisibleCount((prevCount) => prevCount + 10);
@@ -328,7 +332,7 @@ export default function ProtectedLayout({
           formattedDate={formattedDate}
           weekDay={weekDay}
           userName={currentUser?.name ?? ""}
-          account={account}
+          balance={balance}
           showBalance={showBalance}
           setShowBalance={setShowBalance}
         />
@@ -339,7 +343,7 @@ export default function ProtectedLayout({
       </main>
 
       <StatementSection
-        account={account}
+        transactions={transactions}
         loadMoreTransaction={loadMoreTransaction}
         visibleCount={visibleCount}
         visibleTransactions={visibleTransactions}
@@ -352,7 +356,6 @@ export default function ProtectedLayout({
         onClose={handleCloseDetails}
         transactionId={selectedTransactionId}
       />
-      {/* TODO - adicioanr footer no futuro*/}
     </div>
   );
 }

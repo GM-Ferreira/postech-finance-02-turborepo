@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthWithTransactions } from "@/hooks/useAuthWithTransactions";
 import {
   useAppSelector,
   setUser,
@@ -13,7 +13,7 @@ import {
 } from "@repo/ui";
 
 export const useSharedHeaderData = () => {
-  const { isLoggedIn, logout, currentUser } = useAuth();
+  const { isLoggedIn, logout, currentUser } = useAuthWithTransactions();
 
   const reduxUser = useAppSelector((state) => state.user);
   const reduxIsLoggedIn = useAppSelector(selectIsLoggedIn);
@@ -30,16 +30,27 @@ export const useSharedHeaderData = () => {
     }
 
     if (isLoggedIn && currentUser && !reduxIsLoggedIn) {
-      dispatch(
-        setUser({
-          name: currentUser.name,
-          email: currentUser.email || "",
-        })
-      );
+      const userData = storageService.getUserData();
+      if (userData?.accountId) {
+        dispatch(
+          setUser({
+            name: currentUser.name,
+            email: currentUser.email || "",
+            accountId: userData.accountId,
+          })
+        );
+      }
     } else if (!isLoggedIn && reduxIsLoggedIn) {
       dispatch(clearUser());
     }
-  }, [isLoggedIn, currentUser, reduxIsLoggedIn, dispatch, logout, storageService]);
+  }, [
+    isLoggedIn,
+    currentUser,
+    reduxIsLoggedIn,
+    dispatch,
+    logout,
+    storageService,
+  ]);
 
   const finalUser =
     currentUser || (reduxUser.name ? { name: reduxUser.name } : null);
