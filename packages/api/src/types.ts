@@ -126,6 +126,7 @@ export interface CreateTransactionRequest {
   type: TransactionType;
   value: number;
   description?: string;
+  date?: string;
 }
 
 export interface CreateTransactionResponse {
@@ -139,6 +140,7 @@ export interface UpdateTransactionRequest {
   type?: TransactionType;
   value?: number;
   description?: string;
+  date?: string;
 }
 
 export interface UpdateTransactionResponse {

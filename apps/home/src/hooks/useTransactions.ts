@@ -107,6 +107,7 @@ export const useTransactions = () => {
         type,
         value,
         description: `${type} - ${value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} - ${date.toISOString().split("T")[0]}`,
+        date: date.toISOString(),
       };
 
       try {
@@ -137,6 +138,7 @@ export const useTransactions = () => {
         type: data.type,
         value: data.value,
         description: `${data.type} - ${data.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`,
+        date: data.date.toISOString(),
       };
 
       try {
