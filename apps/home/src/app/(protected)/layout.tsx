@@ -22,6 +22,51 @@ type GreetinSectionProps = {
   setShowBalance: (value: boolean) => void;
 };
 
+const GreetingSkeleton: React.FC = () => (
+  <div className="bg-primary p-6 rounded-lg min-h-[655px] sm:min-h-[400px] animate-pulse">
+    <div className="h-8 bg-white/20 rounded-lg w-3/4 mb-6"></div>
+    <div className="h-4 bg-white/15 rounded-lg w-1/2 mb-6"></div>
+
+    <div className="flex justify-end mt-6 pr-6">
+      <div className="max-w-80 min-w-40">
+        <div className="flex flex-row gap-6 items-center pb-2 mb-3 pr-9 border-b border-white/30">
+          <div className="h-4 bg-white/15 rounded w-12"></div>
+          <div className="w-5 h-5 bg-white/15 rounded"></div>
+        </div>
+        <div className="h-4 bg-white/15 rounded w-24 mb-2"></div>
+        <div className="h-8 bg-white/20 rounded-lg w-32"></div>
+      </div>
+    </div>
+  </div>
+);
+
+const StatementSkeleton: React.FC = () => (
+  <aside className="w-full bg-[#f5f5f5] p-6 rounded-lg md:min-w-72 animate-pulse">
+    <div className="flex justify-between items-center mb-4">
+      <div className="h-6 bg-gray-300 rounded w-20"></div>
+      <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
+    </div>
+
+    {[...Array(3)].map((_, i) => (
+      <div
+        key={i}
+        className="flex items-center gap-4 border-b border-gray-200 py-3 px-2"
+      >
+        <div className="flex flex-grow justify-between items-center">
+          <div className="flex-1">
+            <div className="h-4 bg-gray-300 rounded w-16 mb-2"></div>
+            <div className="h-4 bg-gray-300 rounded w-20 mb-1"></div>
+            <div className="h-5 bg-gray-300 rounded w-16"></div>
+          </div>
+          <div className="text-right">
+            <div className="h-3 bg-gray-300 rounded w-16"></div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </aside>
+);
+
 const GreetingSection: React.FC<GreetinSectionProps> = ({
   balance,
   weekDay,
@@ -132,7 +177,7 @@ type StatementSectionProps = {
   transactions: Transaction[];
   visibleCount: number;
   loadMoreTransaction: () => void;
-  deleteTransactions: (idsToDelete: string[]) => void;
+  deleteTransactions: (idsToDelete: string[]) => Promise<void>;
   onOpenTransactionDetails: (transactionId: string) => void;
 };
 
@@ -179,7 +224,7 @@ const StatementSection: React.FC<StatementSectionProps> = ({
     setSelectedIds(newSelectedIds);
   };
 
-  const handleDeleteSelected = () => {
+  const handleDeleteSelected = async () => {
     const idsToDelete = Array.from(selectedIds);
     const count = idsToDelete.length;
 
@@ -188,7 +233,7 @@ const StatementSection: React.FC<StatementSectionProps> = ({
       return;
     }
 
-    deleteTransactions(idsToDelete);
+    await deleteTransactions(idsToDelete);
 
     let message: string;
     if (count === 1) {
@@ -261,7 +306,6 @@ const StatementSection: React.FC<StatementSectionProps> = ({
   );
 };
 
-// TODO - Adicionar loading para a chamada inicial dos valores de balance e transactions
 export default function ProtectedLayout({
   children,
 }: {
@@ -274,6 +318,7 @@ export default function ProtectedLayout({
     showBalance,
     setShowBalance,
     deleteTransactions,
+    isLoading: isLoadingTransactions,
   } = useTransactionsContext();
 
   const [visibleCount, setVisibleCount] = useState(10);
@@ -328,28 +373,36 @@ export default function ProtectedLayout({
       <SharedNavigation />
 
       <main className="flex flex-col gap-6 w-full">
-        <GreetingSection
-          formattedDate={formattedDate}
-          weekDay={weekDay}
-          userName={currentUser?.name ?? ""}
-          balance={balance}
-          showBalance={showBalance}
-          setShowBalance={setShowBalance}
-        />
+        {isLoading || !currentUser ? (
+          <GreetingSkeleton />
+        ) : (
+          <GreetingSection
+            formattedDate={formattedDate}
+            weekDay={weekDay}
+            userName={currentUser.name}
+            balance={balance}
+            showBalance={showBalance}
+            setShowBalance={setShowBalance}
+          />
+        )}
 
         <div className="bg-zinc-300 p-6 rounded-lg flex-1 min-h-[478px]">
           {children}
         </div>
       </main>
 
-      <StatementSection
-        transactions={transactions}
-        loadMoreTransaction={loadMoreTransaction}
-        visibleCount={visibleCount}
-        visibleTransactions={visibleTransactions}
-        deleteTransactions={deleteTransactions}
-        onOpenTransactionDetails={handleOpenDetails}
-      />
+      {isLoadingTransactions ? (
+        <StatementSkeleton />
+      ) : (
+        <StatementSection
+          transactions={transactions}
+          loadMoreTransaction={loadMoreTransaction}
+          visibleCount={visibleCount}
+          visibleTransactions={visibleTransactions}
+          deleteTransactions={deleteTransactions}
+          onOpenTransactionDetails={handleOpenDetails}
+        />
+      )}
 
       <TransactionDetailModal
         isOpen={isDetailModalOpen}
