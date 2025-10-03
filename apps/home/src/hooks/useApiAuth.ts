@@ -54,6 +54,7 @@ export const useApiAuth = () => {
             storageService.setUserData({
               name: userData.userInfo.username || "Nome não encontrado",
               email: userData.userInfo.email || "Não encontrado",
+              accountId: userData.account[0].id || "123",
             });
           }
         }
@@ -100,23 +101,26 @@ export const useApiAuth = () => {
     }
   }, [authService]);
 
-  return useMemo(() => ({
-    register,
-    login,
-    logout,
-    isAuthenticated,
-    getCurrentUser,
-    getAuthToken,
-    getUserAccount,
-    isLoading,
-  }), [
-    register,
-    login,
-    logout,
-    isAuthenticated,
-    getCurrentUser,
-    getAuthToken,
-    getUserAccount,
-    isLoading,
-  ]);
+  return useMemo(
+    () => ({
+      register,
+      login,
+      logout,
+      isAuthenticated,
+      getCurrentUser,
+      getAuthToken,
+      getUserAccount,
+      isLoading,
+    }),
+    [
+      register,
+      login,
+      logout,
+      isAuthenticated,
+      getCurrentUser,
+      getAuthToken,
+      getUserAccount,
+      isLoading,
+    ]
+  );
 };
