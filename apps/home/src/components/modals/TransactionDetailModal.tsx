@@ -5,21 +5,22 @@ import CurrencyInput from "react-currency-input-field";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useAccount } from "@/context/AccountContext";
+import { useTransactionsContext } from "@/context/TransactionsContext";
+
+import { Modal } from "@repo/ui/Modal";
+import { Select } from "@repo/ui/Select";
 
 import { PencilIcon, TrashIcon } from "@/components/icons";
-import {
-  transactionSelectOptions,
-  transactionTypeDisplayNames,
-} from "@/models/Transaction";
 import { CurrencyUtils } from "@/lib/utils/CurrencyUtils";
 import {
   TransactionFormData,
   TransactionFormInput,
   transactionSchema,
 } from "@/lib/schemas/transactionSchema";
-import { Modal } from "@repo/ui/Modal";
-import { Select } from "@repo/ui/Select";
+import {
+  transactionSelectOptions,
+  transactionTypeDisplayNames,
+} from "@repo/api";
 
 interface TransactionDetailModalProps {
   isOpen: boolean;
@@ -40,22 +41,18 @@ const DetailRow = ({
   </div>
 );
 
-function formatDateForInput(date: Date): string {
-  return date.toISOString().split("T")[0] ?? "";
-}
-
 export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
   isOpen,
   onClose,
   transactionId,
-} : TransactionDetailModalProps) => {
-  const { account, updateTransaction, deleteTransactions } = useAccount();
+}: TransactionDetailModalProps) => {
+  const { transactions, editTransaction, deleteTransactions } =
+    useTransactionsContext();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const transaction = account?.transactions.find(
-    (tx) => tx.id === transactionId
-  );
+  const transaction = transactions.find((tx) => tx.id === transactionId);
 
   const {
     control,
@@ -74,12 +71,16 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
 
   useEffect(() => {
     if (isEditing && transaction) {
-      const amountAsString = String(transaction.amount).replace(".", ",");
+      const amountAsString = String(transaction.value).replace(".", ",");
+
+      const dateForInput = new Date(transaction.date)
+        .toISOString()
+        .split("T")[0];
 
       reset({
         type: transaction.type,
         amount: amountAsString,
-        date: formatDateForInput(transaction.date),
+        date: dateForInput,
       });
     }
   }, [isEditing, transaction, reset]);
@@ -88,30 +89,63 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
     return null;
   }
 
-  const onEditSubmit = (data: TransactionFormData) => {
-    if (transactionId) {
-      updateTransaction(transactionId, data);
-      alert("Transação atualizada com sucesso!");
-      setIsEditing(false);
+  const onEditSubmit = async (data: TransactionFormData) => {
+    if (transactionId && !isSubmitting) {
+      setIsSubmitting(true);
+
+      try {
+        const amountAsNumber = parseFloat(data.amount.replace(",", "."));
+        const dateAsDate = new Date(data.date);
+
+        await editTransaction(transactionId, {
+          type: data.type,
+          value: amountAsNumber,
+          date: dateAsDate,
+        });
+
+        alert("Transação atualizada com sucesso!");
+        setIsEditing(false);
+      } catch (error) {
+        alert("Erro ao atualizar transação: " + error);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
   const handleClose = () => {
     setIsEditing(false);
+    setIsSubmitting(false);
     onClose();
   };
 
-  const handleDelete = () => {
-    if (transactionId) {
-      deleteTransactions([transactionId]);
-      alert("Transação excluída com sucesso!");
-      handleClose();
+  const handleDelete = async () => {
+    if (transactionId && !isSubmitting) {
+      setIsSubmitting(true);
+
+      try {
+        await deleteTransactions([transactionId]);
+        alert("Transação excluída com sucesso!");
+        handleClose();
+      } catch (error) {
+        alert("Erro ao excluir transação: " + error);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
-      <div className="flex flex-col items-center text-center p-4 sm:p-6">
+      <div className="relative flex flex-col items-center text-center p-4 sm:p-6">
+        {isSubmitting && (
+          <div className="absolute inset-0 bg-white/5 backdrop-blur-sm z-50 flex items-center justify-center rounded-lg">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-primary font-medium">Processando...</p>
+            </div>
+          </div>
+        )}
         {isEditing ? (
           <>
             <h2 className="text-2xl font-bold text-black mb-6">
@@ -203,6 +237,7 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
                     <input
                       type="date"
                       {...field}
+                      value={field.value || ""}
                       className={`mt-1 block w-full rounded-md border
                       shadow-sm h-12 px-4 bg-white text-zinc-500 
                       ${errors.date ? "border-warning" : "border-primary"}`}
@@ -224,15 +259,17 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className="h-12 px-6 rounded-md bg-warning hover:opacity-100 opacity-80 text-white"
+                  disabled={isSubmitting}
+                  className="h-12 px-6 rounded-md bg-warning hover:opacity-100 opacity-80 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="h-12 px-6 rounded-md bg-success hover:opacity-100 opacity-80 text-white"
+                  disabled={isSubmitting}
+                  className="h-12 px-6 rounded-md bg-success hover:opacity-100 opacity-80 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Salvar Alterações
+                  {isSubmitting ? "Salvando..." : "Salvar Alterações"}
                 </button>
               </div>
             </form>
@@ -251,12 +288,12 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
 
               <DetailRow
                 label="Valor"
-                value={CurrencyUtils.formatBRL(transaction.amount)}
+                value={CurrencyUtils.formatBRL(transaction.value)}
               />
 
               <DetailRow
                 label="Data"
-                value={transaction.date.toLocaleString("pt-BR", {
+                value={new Date(transaction.date).toLocaleString("pt-BR", {
                   day: "2-digit",
                   month: "2-digit",
                   year: "numeric",
@@ -271,17 +308,19 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
             <div className="mt-8 flex flex-col sm:flex-row gap-4 w-full justify-center">
               <button
                 onClick={handleDelete}
+                disabled={isSubmitting}
                 className="flex items-center justify-center gap-2 w-full sm:w-auto h-12 px-6 opacity-80 
-                rounded-md bg-warning text-white hover:opacity-100 transition-colors"
+                rounded-md bg-warning text-white hover:opacity-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <TrashIcon size={18} />
-                Excluir
+                {isSubmitting ? "Excluindo..." : "Excluir"}
               </button>
 
               <button
                 onClick={() => setIsEditing(true)}
+                disabled={isSubmitting}
                 className="flex items-center justify-center gap-2 w-full sm:w-auto h-12 px-6 opacity-80 
-                 rounded-md bg-primary text-white hover:opacity-100 transition-colors"
+                 rounded-md bg-primary text-white hover:opacity-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <PencilIcon size={18} />
                 Editar
