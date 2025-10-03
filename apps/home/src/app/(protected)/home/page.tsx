@@ -32,7 +32,6 @@ export default function Home() {
     },
   });
 
-  // TODO - Ajustar método que faz o add e adicionar loading
   const onSubmit = async (data: TransactionFormData) => {
     const amountAsNumber = parseFloat(data.amount.replace(",", "."));
 
@@ -140,7 +139,7 @@ export default function Home() {
 
         <div className="pt-4">
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Adicionando..." : "Adicionar transação"}
+            {isLoading ? "Carregando..." : "Adicionar transação"}
           </Button>
         </div>
       </form>

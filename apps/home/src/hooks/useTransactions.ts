@@ -157,15 +157,27 @@ export const useTransactions = () => {
     [updateTransaction, fetchTransactions]
   );
 
+  const removeTransactionInternal = useCallback(
+    async (transactionId: string) => {
+      const response = await deleteTransaction(transactionId);
+      if (response.error) {
+        console.error("Erro ao deletar transação:", response.error);
+        throw new Error(
+          `Erro ao deletar transação ${transactionId}: ${response.error}`
+        );
+      }
+      return response;
+    },
+    [deleteTransaction]
+  );
+
   const removeTransaction = useCallback(
     async (transactionId: string) => {
       try {
-        const response = await deleteTransaction(transactionId);
+        const response = await removeTransactionInternal(transactionId);
 
         if (response.data) {
           await fetchTransactions(true);
-        } else if (response.error) {
-          console.error("Erro ao deletar transação:", response.error);
         }
 
         return response;
@@ -174,21 +186,25 @@ export const useTransactions = () => {
         throw err;
       }
     },
-    [deleteTransaction, fetchTransactions]
+    [removeTransactionInternal, fetchTransactions]
   );
 
   const deleteTransactions = useCallback(
     async (idsToDelete: string[]) => {
       try {
-        for (const id of idsToDelete) {
-          await removeTransaction(id);
-        }
+        const deletePromises = idsToDelete.map((id) =>
+          removeTransactionInternal(id)
+        );
+
+        await Promise.all(deletePromises);
+
+        await fetchTransactions(true);
       } catch (error) {
         console.error("Erro ao deletar transações:", error);
         throw error;
       }
     },
-    [removeTransaction]
+    [removeTransactionInternal, fetchTransactions]
   );
 
   const clearTransactions = useCallback(() => {
