@@ -13,9 +13,41 @@ import {
   TransactionFormInput,
 } from "@/lib/schemas/transactionSchema";
 import { useTransactionsContext } from "@/context/TransactionsContext";
+import { useAuth } from "@/hooks/useAuth";
+
+const TransactionFormSkeleton = () => (
+  <div className="relative z-10">
+    <div className="h-9 bg-gray-200 rounded-md w-48 mb-8 animate-pulse"></div>
+
+    <div className="space-y-6">
+      <div>
+        <div className="h-4 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+        <div className="h-12 bg-gray-200 rounded-lg max-w-96 animate-pulse"></div>
+      </div>
+
+      <div>
+        <div className="h-4 bg-gray-200 rounded w-16 mb-2 animate-pulse"></div>
+        <div className="h-12 bg-gray-200 rounded-md max-w-2xs animate-pulse"></div>
+      </div>
+
+      <div>
+        <div className="h-4 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+        <div className="h-12 bg-gray-200 rounded-md max-w-96 animate-pulse"></div>
+      </div>
+
+      <div className="pt-4">
+        <div className="h-12 bg-gray-200 rounded-md w-48 animate-pulse"></div>
+      </div>
+    </div>
+  </div>
+);
 
 export default function Home() {
-  const { addTransaction, isLoading } = useTransactionsContext();
+  const { addTransaction, isLoading: isTransactionLoading } =
+    useTransactionsContext();
+  const { isLoading: isAuthLoading } = useAuth();
+
+  const isLoading = isAuthLoading || isTransactionLoading;
 
   const {
     handleSubmit,
@@ -45,6 +77,10 @@ export default function Home() {
       alert("Erro ao adicionar transação. Tente novamente.");
     }
   };
+
+  if (isLoading) {
+    return <TransactionFormSkeleton />;
+  }
 
   return (
     <div className="relative z-10">
