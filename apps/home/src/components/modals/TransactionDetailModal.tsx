@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransactionsContext } from "@/context/TransactionsContext";
 
 import { Modal } from "@repo/ui/Modal";
-import { Select } from "@repo/ui/Select";
+import { Autocomplete } from "@repo/ui";
 
 import { PencilIcon, TrashIcon } from "@/components/icons";
 import { CurrencyUtils } from "@/lib/utils/CurrencyUtils";
@@ -167,12 +167,13 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
                   name="type"
                   control={control}
                   render={({ field }) => (
-                    <Select
+                    <Autocomplete
                       {...field}
                       value={field.value || ""}
-                      placeholder="Selecione o tipo de transação"
+                      placeholder="Digite para buscar o tipo de transação..."
                       options={transactionSelectOptions}
-                      className={`max-w-96 ${errors.type && "border-warning"}`}
+                      className={`max-w-96`}
+                      error={!!errors.type}
                     />
                   )}
                 />

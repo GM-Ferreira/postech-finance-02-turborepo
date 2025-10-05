@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { Modal } from "@repo/ui/Modal";
-import { Select } from "@repo/ui/Select";
+import { Autocomplete } from "@repo/ui";
 import { transactionSelectOptions, TransactionType } from "@repo/api";
 
 export interface TransactionFilters {
@@ -113,10 +113,10 @@ export const TransactionFilterModal: React.FC<TransactionFilterModalProps> = ({
               name="type"
               control={control}
               render={({ field }) => (
-                <Select
+                <Autocomplete
                   {...field}
                   value={field.value || ""}
-                  placeholder="Todos os tipos"
+                  placeholder="Digite para buscar tipo ou deixe vazio para todos"
                   options={[
                     { value: "", label: "Todos os tipos" },
                     ...transactionSelectOptions,

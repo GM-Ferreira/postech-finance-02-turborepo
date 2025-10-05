@@ -2,6 +2,8 @@ export { Button } from "./Button";
 export { Input } from "./Input";
 export { Modal } from "./Modal";
 export { Select } from "./Select";
+export { Autocomplete } from "./Autocomplete";
+export type { AutocompleteOption, AutocompleteProps } from "./Autocomplete";
 
 // Components
 export { SharedHeader } from "./components/SharedHeader";

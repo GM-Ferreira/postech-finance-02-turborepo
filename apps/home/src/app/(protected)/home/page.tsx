@@ -5,7 +5,7 @@ import CurrencyInput from "react-currency-input-field";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { transactionSelectOptions } from "@repo/api";
-import { Select, Button } from "@repo/ui";
+import { Autocomplete, Button } from "@repo/ui";
 
 import {
   transactionSchema,
@@ -52,17 +52,21 @@ export default function Home() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            Tipo de Transação
+          </label>
           <Controller
             name="type"
             control={control}
             render={({ field }) => (
-              <Select
+              <Autocomplete
                 {...field}
                 value={field.value || ""}
-                placeholder="Selecione o tipo de transação"
+                placeholder="Digite para buscar o tipo de transação..."
                 options={transactionSelectOptions}
-                className={`max-w-96 ${errors.type && "border-warning"}`}
+                className={`max-w-96 ${errors.type ? "border-warning" : ""}`}
                 disabled={isLoading}
+                error={!!errors.type}
               />
             )}
           />
