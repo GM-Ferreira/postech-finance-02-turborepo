@@ -13,7 +13,7 @@ import { StorageService } from "@repo/ui";
 import { useApiTransactions } from "./useApiTransactions";
 import { useAuth } from "./useAuth";
 
-export const useTransactions = () => {
+export const useTransactions = (onTokenExpired?: () => void) => {
   const { isLoggedIn, currentUser } = useAuth();
   const {
     getTransactions,
@@ -21,7 +21,7 @@ export const useTransactions = () => {
     updateTransaction,
     deleteTransaction,
     isLoading: apiLoading,
-  } = useApiTransactions();
+  } = useApiTransactions(onTokenExpired);
 
   const storageService = useMemo(() => new StorageService(), []);
 

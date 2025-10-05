@@ -11,8 +11,8 @@ import {
 export class AuthService {
   private userClient: UserClient;
 
-  constructor(getTokenFn?: () => string | null) {
-    this.userClient = new UserClient(undefined, getTokenFn);
+  constructor(getTokenFn?: () => string | null, onUnauthorized?: () => void) {
+    this.userClient = new UserClient(undefined, getTokenFn, onUnauthorized);
   }
 
   /**

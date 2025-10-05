@@ -13,14 +13,21 @@ import type {
   GetUserAccountResponse,
 } from "@repo/api";
 
-export const useApiAuth = () => {
+export const useApiAuth = (onTokenExpired?: () => void) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const storageService = useMemo(() => new StorageService(), []);
 
+  const handleTokenExpired = useCallback(() => {
+    console.warn("Token expirado - limpando dados e notificando Context");
+    storageService.clearAllUserData();
+    onTokenExpired?.();
+  }, [storageService, onTokenExpired]);
+
   const authService = useMemo(
-    () => new AuthService(() => storageService.getAuthToken()),
-    [storageService]
+    () =>
+      new AuthService(() => storageService.getAuthToken(), handleTokenExpired),
+    [storageService, handleTokenExpired]
   );
 
   const register = useCallback(

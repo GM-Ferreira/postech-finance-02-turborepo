@@ -6,13 +6,16 @@ export class BaseApiClient {
   protected client: AxiosInstance;
   protected baseURL: string;
   private getTokenFn?: () => string | null;
+  private onUnauthorized?: () => void;
 
   constructor(
     baseURL: string = "https://postech-finance-02-api.onrender.com", // TODO - adicionar variável de ambiente
-    getTokenFn?: () => string | null
+    getTokenFn?: () => string | null,
+    onUnauthorized?: () => void
   ) {
     this.baseURL = baseURL;
     this.getTokenFn = getTokenFn;
+    this.onUnauthorized = onUnauthorized;
 
     this.client = axios.create({
       baseURL: this.baseURL,
@@ -44,6 +47,11 @@ export class BaseApiClient {
         return response;
       },
       (error: any) => {
+        if (error.response?.status === 401) {
+          console.warn("Token expirado - fazendo logout automático");
+          this.onUnauthorized?.();
+        }
+
         const apiError: ApiError = {
           message:
             error.response?.data?.message ||

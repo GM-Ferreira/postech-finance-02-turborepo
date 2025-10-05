@@ -10,8 +10,8 @@ import type {
 } from "../types";
 
 export class TransactionClient extends BaseApiClient {
-  constructor(baseURL?: string, getTokenFn?: () => string | null) {
-    super(baseURL, getTokenFn);
+  constructor(baseURL?: string, getTokenFn?: () => string | null, onUnauthorized?: () => void) {
+    super(baseURL, getTokenFn, onUnauthorized);
   }
 
   /**

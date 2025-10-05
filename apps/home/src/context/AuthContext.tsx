@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useState, ReactNode, useEffect } from "react";
+import {
+  createContext,
+  useState,
+  ReactNode,
+  useEffect,
+  useCallback,
+} from "react";
 
 import { useApiAuth } from "@/hooks/useApiAuth";
 import { StringUtils } from "@/lib/utils/StringUtils";
@@ -28,9 +34,14 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 );
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const apiAuth = useApiAuth();
-
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  const handleTokenExpired = useCallback(() => {
+    alert("Sua sessão expirou. Você será redirecionado para o login.");
+    setCurrentUser(null);
+  }, []);
+
+  const apiAuth = useApiAuth(handleTokenExpired);
 
   useEffect(() => {
     const userData = apiAuth.getCurrentUser();
@@ -83,10 +94,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return false;
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     apiAuth.logout();
     setCurrentUser(null);
-  };
+  }, [apiAuth]);
 
   const value = {
     isLoading: apiAuth.isLoading,

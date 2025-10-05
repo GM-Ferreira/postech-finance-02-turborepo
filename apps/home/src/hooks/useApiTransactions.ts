@@ -14,14 +14,18 @@ import type {
   DeleteTransactionResponse,
 } from "@repo/api";
 
-export const useApiTransactions = () => {
+export const useApiTransactions = (onTokenExpired?: () => void) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const storageService = useMemo(() => new StorageService(), []);
 
   const transactionService = useMemo(
-    () => new TransactionService(() => storageService.getAuthToken()),
-    [storageService]
+    () =>
+      new TransactionService(
+        () => storageService.getAuthToken(),
+        onTokenExpired
+      ),
+    [storageService, onTokenExpired]
   );
 
   const getTransactions = useCallback(async (): Promise<

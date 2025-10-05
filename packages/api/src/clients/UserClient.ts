@@ -11,9 +11,10 @@ import {
 export class UserClient extends BaseApiClient {
   constructor(
     baseURL?: string,
-    getTokenFn?: () => string | null
+    getTokenFn?: () => string | null,
+    onUnauthorized?: () => void
   ) {
-    super(baseURL, getTokenFn);
+    super(baseURL, getTokenFn, onUnauthorized);
   }
 
   /**

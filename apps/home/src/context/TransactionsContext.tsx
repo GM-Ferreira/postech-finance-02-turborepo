@@ -1,8 +1,14 @@
 "use client";
 
-import React, { createContext, useContext, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  ReactNode,
+  useCallback,
+} from "react";
 
 import { useTransactions } from "@/hooks/useTransactions";
+import { useAuth } from "@/hooks/useAuth";
 
 type TransactionsContextType = ReturnType<typeof useTransactions>;
 
@@ -11,7 +17,14 @@ const TransactionsContext = createContext<TransactionsContextType | undefined>(
 );
 
 export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
-  const transactionsData = useTransactions();
+  const { logout } = useAuth();
+
+  const handleTokenExpired = useCallback(() => {
+    console.warn("Token expirou durante operação de transação");
+    logout();
+  }, [logout]);
+
+  const transactionsData = useTransactions(handleTokenExpired);
 
   return (
     <TransactionsContext.Provider value={transactionsData}>
