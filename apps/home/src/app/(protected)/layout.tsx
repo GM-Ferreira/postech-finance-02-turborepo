@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
-import { SharedNavigation } from "@repo/ui";
+import { SharedNavigation, useHydration, StorageService } from "@repo/ui";
 import { Transaction, transactionTypeDisplayNames } from "@repo/api";
 
 import { useTransactionsContext } from "@/context/TransactionsContext";
@@ -341,6 +341,8 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   const { isLoggedIn, isLoading, currentUser } = useAuth();
+  const isHydrated = useHydration();
+  const storageService = useMemo(() => new StorageService(), []);
   const {
     transactions,
     balance,
@@ -365,10 +367,21 @@ export default function ProtectedLayout({
   const formattedDate = now.toLocaleDateString("pt-BR");
 
   useEffect(() => {
-    if (!isLoading && !isLoggedIn) {
-      router.replace("/");
-    }
-  }, [isLoading, isLoggedIn, router]);
+    if (!isHydrated) return;
+
+    const checkAuth = setTimeout(() => {
+      if (!isLoading && !isLoggedIn) {
+        const token = storageService.getAuthToken();
+        const userData = storageService.getUserData();
+
+        if (!token || !userData) {
+          router.replace("/");
+        }
+      }
+    }, 300);
+
+    return () => clearTimeout(checkAuth);
+  }, [isLoading, isLoggedIn, router, isHydrated, storageService]);
 
   const applyFilters = useCallback(
     (transactions: Transaction[], filters: TransactionFilters) => {
