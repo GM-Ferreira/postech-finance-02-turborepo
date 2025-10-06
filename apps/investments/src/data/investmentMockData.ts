@@ -37,6 +37,16 @@ export const investmentMockData: InvestmentItem[] = [
   },
 ];
 
+export interface InvestmentGoals {
+  fixedIncomeGoal: number;
+  variableIncomeGoal: number;
+}
+
+export const defaultInvestmentGoals: InvestmentGoals = {
+  fixedIncomeGoal: 25000,
+  variableIncomeGoal: 35000,
+};
+
 export const getInvestmentSummary = () => {
   const fixedIncome = investmentMockData
     .filter((item) => item.type === "fixed")
@@ -53,4 +63,41 @@ export const getInvestmentSummary = () => {
     variableIncome,
     total,
   };
+};
+
+export const getInvestmentProgress = (goals: InvestmentGoals) => {
+  const summary = getInvestmentSummary();
+
+  return {
+    fixedIncomeProgress: (summary.fixedIncome / goals.fixedIncomeGoal) * 100,
+    variableIncomeProgress:
+      (summary.variableIncome / goals.variableIncomeGoal) * 100,
+    totalGoal: goals.fixedIncomeGoal + goals.variableIncomeGoal,
+    totalProgress:
+      (summary.total / (goals.fixedIncomeGoal + goals.variableIncomeGoal)) *
+      100,
+  };
+};
+
+export const simulateUpdate = (): InvestmentItem[] => {
+  return investmentMockData.map((item) => {
+    let variation: number;
+
+    if (item.type === "fixed") {
+      variation = (Math.random() - 0.3) * 0.07;
+    } else {
+      variation = (Math.random() - 0.45) * 0.35;
+    }
+
+    const newValue = Math.max(1000, Math.round(item.value * (1 + variation)));
+
+    return {
+      ...item,
+      value: newValue,
+    };
+  });
+};
+
+export const updateInvestmentData = (newData: InvestmentItem[]): void => {
+  investmentMockData.splice(0, investmentMockData.length, ...newData);
 };

@@ -10,7 +10,11 @@ import {
 } from "recharts";
 import { PieSectorDataItem } from "recharts/types/polar/Pie";
 
-import { investmentMockData } from "@/data/investmentMockData";
+import { InvestmentItem } from "@/data/investmentMockData";
+
+interface InvestmentChartProps {
+  investments: InvestmentItem[];
+}
 
 const getInvestmentAbbreviation = (name: string): string => {
   return name
@@ -92,13 +96,13 @@ const renderActiveShape = ({
   );
 };
 
-export const InvestmentChart = () => {
+export const InvestmentChart = ({ investments }: InvestmentChartProps) => {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <PieChart>
         <Pie
           activeShape={renderActiveShape}
-          data={investmentMockData}
+          data={investments}
           cx="50%"
           cy="50%"
           innerRadius={70}
@@ -109,7 +113,7 @@ export const InvestmentChart = () => {
           cornerRadius={15}
           stroke="transparent"
         >
-          {investmentMockData.map((entry, index) => (
+          {investments.map((entry: InvestmentItem, index: number) => (
             <Cell key={`cell-${index}`} fill={entry.color} />
           ))}
         </Pie>
