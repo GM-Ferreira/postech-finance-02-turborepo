@@ -24,6 +24,7 @@ export const useApiAuth = (
   const handleTokenExpired = useCallback(() => {
     console.warn("Token expirado - limpando dados e notificando Context");
     storageService.clearAllUserData();
+    storageService.setExternalLogoutFlag();
     onTokenExpired?.();
   }, [storageService, onTokenExpired]);
 
@@ -71,6 +72,8 @@ export const useApiAuth = (
               accountId: userData.account[0].id || "123",
             });
           }
+
+          storageService.clearExternalLogoutFlag();
         }
 
         return response;
