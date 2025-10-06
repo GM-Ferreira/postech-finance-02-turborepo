@@ -13,7 +13,10 @@ import type {
   GetUserAccountResponse,
 } from "@repo/api";
 
-export const useApiAuth = (onTokenExpired?: () => void) => {
+export const useApiAuth = (
+  onTokenExpired?: () => void,
+  onSlowRequest?: (show: boolean) => void
+) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const storageService = useMemo(() => new StorageService(), []);
@@ -26,8 +29,12 @@ export const useApiAuth = (onTokenExpired?: () => void) => {
 
   const authService = useMemo(
     () =>
-      new AuthService(() => storageService.getAuthToken(), handleTokenExpired),
-    [storageService, handleTokenExpired]
+      new AuthService(
+        () => storageService.getAuthToken(),
+        handleTokenExpired,
+        onSlowRequest
+      ),
+    [storageService, handleTokenExpired, onSlowRequest]
   );
 
   const register = useCallback(

@@ -7,6 +7,8 @@ import React, {
   useCallback,
 } from "react";
 
+import { useToast } from "@/context/ToastContext";
+
 import { useTransactions } from "@/hooks/useTransactions";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -18,13 +20,24 @@ const TransactionsContext = createContext<TransactionsContextType | undefined>(
 
 export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   const { logout } = useAuth();
+  const { setShowSlowApiToast } = useToast();
 
   const handleTokenExpired = useCallback(() => {
     console.warn("Token expirou durante operação de transação");
     logout();
   }, [logout]);
 
-  const transactionsData = useTransactions(handleTokenExpired);
+  const handleSlowRequest = useCallback(
+    (show: boolean) => {
+      setShowSlowApiToast(show);
+    },
+    [setShowSlowApiToast]
+  );
+
+  const transactionsData = useTransactions(
+    handleTokenExpired,
+    handleSlowRequest
+  );
 
   return (
     <TransactionsContext.Provider value={transactionsData}>

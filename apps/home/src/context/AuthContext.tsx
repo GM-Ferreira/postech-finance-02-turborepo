@@ -8,6 +8,8 @@ import {
   useCallback,
 } from "react";
 
+import { useToast } from "@/context/ToastContext";
+
 import { useApiAuth } from "@/hooks/useApiAuth";
 import { StringUtils } from "@/lib/utils/StringUtils";
 
@@ -35,13 +37,21 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const { setShowSlowApiToast } = useToast();
 
   const handleTokenExpired = useCallback(() => {
     alert("Sua sessão expirou. Você será redirecionado para o login.");
     setCurrentUser(null);
   }, []);
 
-  const apiAuth = useApiAuth(handleTokenExpired);
+  const handleSlowRequest = useCallback(
+    (show: boolean) => {
+      setShowSlowApiToast(show);
+    },
+    [setShowSlowApiToast]
+  );
+
+  const apiAuth = useApiAuth(handleTokenExpired, handleSlowRequest);
 
   useEffect(() => {
     const userData = apiAuth.getCurrentUser();

@@ -12,11 +12,16 @@ import type {
 export class TransactionService {
   private transactionClient: TransactionClient;
 
-  constructor(getTokenFn?: () => string | null, onUnauthorized?: () => void) {
+  constructor(
+    getTokenFn?: () => string | null,
+    onUnauthorized?: () => void,
+    onSlowRequest?: (show: boolean) => void
+  ) {
     this.transactionClient = new TransactionClient(
       undefined,
       getTokenFn,
-      onUnauthorized
+      onUnauthorized,
+      onSlowRequest
     );
   }
 

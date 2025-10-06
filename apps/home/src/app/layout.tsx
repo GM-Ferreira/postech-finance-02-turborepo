@@ -5,9 +5,11 @@ import { ReduxProvider } from "@repo/ui";
 
 import { AuthProvider } from "@/context/AuthContext";
 import { TransactionsProvider } from "@/context/TransactionsContext";
+import { ToastProvider } from "@/context/ToastContext";
 
 import "./globals.css";
 import Header from "@/components/layout/Header";
+import SlowApiToast from "@/components/toast/SlowApiToast";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,12 +30,15 @@ export default function RootLayout({
     <html lang="pt-br">
       <body className={`${inter.variable}`}>
         <ReduxProvider>
-          <AuthProvider>
-            <TransactionsProvider>
-              <Header />
-              {children}
-            </TransactionsProvider>
-          </AuthProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <TransactionsProvider>
+                <Header />
+                {children}
+                <SlowApiToast />
+              </TransactionsProvider>
+            </AuthProvider>
+          </ToastProvider>
         </ReduxProvider>
       </body>
     </html>

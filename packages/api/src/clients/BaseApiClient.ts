@@ -2,20 +2,30 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
 import { ApiResponse, ApiError } from "../types";
 
+declare module "axios" {
+  export interface InternalAxiosRequestConfig {
+    requestId?: string;
+  }
+}
+
 export class BaseApiClient {
   protected client: AxiosInstance;
   protected baseURL: string;
   private getTokenFn?: () => string | null;
   private onUnauthorized?: () => void;
+  private onSlowRequest?: (show: boolean) => void;
+  private slowRequestTimers: Map<string, NodeJS.Timeout> = new Map();
 
   constructor(
     baseURL: string = "https://postech-finance-02-api.onrender.com", // TODO - adicionar variável de ambiente
     getTokenFn?: () => string | null,
-    onUnauthorized?: () => void
+    onUnauthorized?: () => void,
+    onSlowRequest?: (show: boolean) => void
   ) {
     this.baseURL = baseURL;
     this.getTokenFn = getTokenFn;
     this.onUnauthorized = onUnauthorized;
+    this.onSlowRequest = onSlowRequest;
 
     this.client = axios.create({
       baseURL: this.baseURL,
@@ -35,6 +45,18 @@ export class BaseApiClient {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+
+        const requestId = Math.random().toString(36).substring(7);
+        config.requestId = requestId;
+
+        const timer = setTimeout(() => {
+          if (this.onSlowRequest) {
+            this.onSlowRequest(true);
+          }
+        }, 6000);
+
+        this.slowRequestTimers.set(requestId, timer);
+
         return config;
       },
       (error: any) => {
@@ -44,9 +66,31 @@ export class BaseApiClient {
 
     this.client.interceptors.response.use(
       (response: AxiosResponse) => {
+        const requestId = response.config.requestId;
+
+        if (requestId && this.slowRequestTimers.has(requestId)) {
+          clearTimeout(this.slowRequestTimers.get(requestId));
+          this.slowRequestTimers.delete(requestId);
+
+          if (this.slowRequestTimers.size === 0 && this.onSlowRequest) {
+            this.onSlowRequest(false);
+          }
+        }
+
         return response;
       },
       (error: any) => {
+        const requestId = error.config?.requestId;
+
+        if (requestId && this.slowRequestTimers.has(requestId)) {
+          clearTimeout(this.slowRequestTimers.get(requestId));
+          this.slowRequestTimers.delete(requestId);
+
+          if (this.slowRequestTimers.size === 0 && this.onSlowRequest) {
+            this.onSlowRequest(false);
+          }
+        }
+
         if (error.response?.status === 401) {
           console.warn("Token expirado - fazendo logout automático");
           this.onUnauthorized?.();
