@@ -10,11 +10,7 @@ import {
 } from "recharts";
 import { PieSectorDataItem } from "recharts/types/polar/Pie";
 
-interface InvestmentData extends Record<string, unknown> {
-  name: string;
-  value: number;
-  color: string;
-}
+import { investmentMockData } from "@/data/investmentMockData";
 
 const getInvestmentAbbreviation = (name: string): string => {
   return name
@@ -23,29 +19,6 @@ const getInvestmentAbbreviation = (name: string): string => {
     .map((word) => word.charAt(0).toUpperCase())
     .join(".");
 };
-
-const data: InvestmentData[] = [
-  {
-    name: "Fundos de investimento",
-    value: 15000,
-    color: "#0088FE",
-  },
-  {
-    name: "Tesouro Direto",
-    value: 10000,
-    color: "#8884d8",
-  },
-  {
-    name: "Previdência Privada",
-    value: 8000,
-    color: "#FF8042",
-  },
-  {
-    name: "Bolsa de Valores",
-    value: 17000,
-    color: "#FFBB28",
-  },
-];
 
 const renderActiveShape = ({
   cx,
@@ -104,14 +77,14 @@ const renderActiveShape = ({
         x={ex + (cos >= 0 ? 1 : -1) * 12}
         y={ey}
         textAnchor={textAnchor}
-        fill="#333"
+        fill="white"
       >{`R$ ${value}`}</text>
       <text
         x={ex + (cos >= 0 ? 1 : -1) * 12}
         y={ey}
         dy={18}
         textAnchor={textAnchor}
-        fill="#999"
+        fill="white"
       >
         {`(${((percent ?? 1) * 100).toFixed(2)}%)`}
       </text>
@@ -125,7 +98,7 @@ export const InvestmentChart = () => {
       <PieChart>
         <Pie
           activeShape={renderActiveShape}
-          data={data}
+          data={investmentMockData}
           cx="50%"
           cy="50%"
           innerRadius={70}
@@ -134,8 +107,9 @@ export const InvestmentChart = () => {
           paddingAngle={-10}
           dataKey="value"
           cornerRadius={15}
+          stroke="transparent"
         >
-          {data.map((entry, index) => (
+          {investmentMockData.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={entry.color} />
           ))}
         </Pie>
@@ -144,7 +118,10 @@ export const InvestmentChart = () => {
           layout="vertical"
           verticalAlign="middle"
           align="right"
-          wrapperStyle={{ paddingLeft: "20px" }}
+          wrapperStyle={{
+            paddingLeft: "20px",
+            color: "white",
+          }}
         />
       </PieChart>
     </ResponsiveContainer>
