@@ -105,12 +105,18 @@ export const useTransactions = (
   );
 
   const addTransaction = useCallback(
-    async (type: TransactionType, value: number, date: Date) => {
+    async (
+      type: TransactionType,
+      value: number,
+      date: Date,
+      anexo?: string
+    ) => {
       const data: Omit<CreateTransactionRequest, "accountId"> = {
         type,
         value,
         description: `${type} - ${value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} - ${date.toISOString().split("T")[0]}`,
         date: date.toISOString(),
+        ...(anexo && { anexo }),
       };
 
       try {
@@ -135,6 +141,7 @@ export const useTransactions = (
         type: TransactionType;
         value: number;
         date: Date;
+        anexo?: string;
       }
     ) => {
       const updateData: UpdateTransactionRequest = {
@@ -142,6 +149,7 @@ export const useTransactions = (
         value: data.value,
         description: `${data.type} - ${data.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`,
         date: data.date.toISOString(),
+        ...(data.anexo !== undefined && { anexo: data.anexo }),
       };
 
       try {

@@ -14,6 +14,7 @@ import {
 } from "@/lib/schemas/transactionSchema";
 import { useTransactionsContext } from "@/context/TransactionsContext";
 import { useAuth } from "@/hooks/useAuth";
+import { ImageUpload } from "@/components/upload/ImageUpload";
 
 const TransactionFormSkeleton = () => (
   <div className="relative z-10">
@@ -61,6 +62,7 @@ export default function Home() {
       type: undefined,
       amount: "",
       date: "",
+      anexo: undefined,
     },
   });
 
@@ -68,7 +70,7 @@ export default function Home() {
     const amountAsNumber = parseFloat(data.amount.replace(",", "."));
 
     try {
-      await addTransaction(data.type, amountAsNumber, data.date);
+      await addTransaction(data.type, amountAsNumber, data.date, data.anexo);
 
       alert("Transação adicionada com sucesso!");
       reset();
@@ -174,6 +176,27 @@ export default function Home() {
           />
           {errors.date && (
             <p className="mt-1 text-sm text-warning">{errors.date.message}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            Comprovante (opcional)
+          </label>
+          <Controller
+            name="anexo"
+            control={control}
+            render={({ field }) => (
+              <ImageUpload
+                onImageSelect={(base64) => field.onChange(base64 || undefined)}
+                value={field.value}
+                disabled={isLoading}
+                className="max-w-96"
+              />
+            )}
+          />
+          {errors.anexo && (
+            <p className="mt-1 text-sm text-warning">{errors.anexo.message}</p>
           )}
         </div>
 

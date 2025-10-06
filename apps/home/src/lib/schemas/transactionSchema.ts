@@ -20,6 +20,7 @@ export const transactionSchema = z.object({
     .string()
     .min(1, { message: "A data é obrigatória." })
     .transform((dateStr) => new Date(`${dateStr}T00:00:00`)),
+  anexo: z.string().optional(),
 });
 
 export type TransactionFormData = z.infer<typeof transactionSchema>;

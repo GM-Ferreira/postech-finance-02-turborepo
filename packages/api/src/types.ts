@@ -112,6 +112,7 @@ export interface Transaction {
   value: number;
   date: string;
   description?: string;
+  anexo?: string;
 }
 
 export interface GetTransactionsResponse {
@@ -127,6 +128,7 @@ export interface CreateTransactionRequest {
   value: number;
   description?: string;
   date?: string;
+  anexo?: string;
 }
 
 export interface CreateTransactionResponse {
@@ -141,6 +143,7 @@ export interface UpdateTransactionRequest {
   value?: number;
   description?: string;
   date?: string;
+  anexo?: string; // Base64 encoded image
 }
 
 export interface UpdateTransactionResponse {

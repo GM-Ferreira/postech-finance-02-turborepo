@@ -9,6 +9,10 @@ import { useTransactionsContext } from "@/context/TransactionsContext";
 
 import { Modal } from "@repo/ui/Modal";
 import { Autocomplete } from "@repo/ui";
+import {
+  transactionSelectOptions,
+  transactionTypeDisplayNames,
+} from "@repo/api";
 
 import { PencilIcon, TrashIcon } from "@/components/icons";
 import { CurrencyUtils } from "@/lib/utils/CurrencyUtils";
@@ -17,10 +21,8 @@ import {
   TransactionFormInput,
   transactionSchema,
 } from "@/lib/schemas/transactionSchema";
-import {
-  transactionSelectOptions,
-  transactionTypeDisplayNames,
-} from "@repo/api";
+import { ImageAttachmentViewer } from "./ImageAttachmentViewer";
+import { ImageUpload } from "@/components/upload/ImageUpload";
 
 interface TransactionDetailModalProps {
   isOpen: boolean;
@@ -51,6 +53,7 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
   const transaction = transactions.find((tx) => tx.id === transactionId);
 
@@ -66,6 +69,7 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
       type: undefined,
       amount: "",
       date: "",
+      anexo: undefined,
     },
   });
 
@@ -81,6 +85,7 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
         type: transaction.type,
         amount: amountAsString,
         date: dateForInput,
+        anexo: transaction.anexo,
       });
     }
   }, [isEditing, transaction, reset]);
@@ -101,6 +106,7 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
           type: data.type,
           value: amountAsNumber,
           date: dateAsDate,
+          anexo: data.anexo,
         });
 
         alert("Transação atualizada com sucesso!");
@@ -252,6 +258,31 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
                 )}
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Comprovante (opcional)
+                </label>
+                <Controller
+                  name="anexo"
+                  control={control}
+                  render={({ field }) => (
+                    <ImageUpload
+                      onImageSelect={(base64) =>
+                        field.onChange(base64 || undefined)
+                      }
+                      value={field.value}
+                      disabled={isSubmitting}
+                      className="w-full"
+                    />
+                  )}
+                />
+                {errors.anexo && (
+                  <p className="mt-1 text-sm text-warning">
+                    {errors.anexo.message}
+                  </p>
+                )}
+              </div>
+
               <DetailRow label="Descrição" value={transaction.description} />
 
               <DetailRow label="#ID" value={transaction.id} />
@@ -303,6 +334,19 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
 
               <DetailRow label="Descrição" value={transaction.description} />
 
+              {transaction.anexo && (
+                <div className="text-left w-full mb-4">
+                  <p className="text-sm text-gray-500">Comprovante</p>
+                  <button
+                    onClick={() => setIsImageViewerOpen(true)}
+                    className="mt-2 flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary 
+                    rounded-md hover:bg-primary/20 transition-colors"
+                  >
+                    📎 Ver Comprovante
+                  </button>
+                </div>
+              )}
+
               <DetailRow label="#ID" value={transaction.id} />
             </div>
 
@@ -330,6 +374,15 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
           </>
         )}
       </div>
+
+      {transaction?.anexo && (
+        <ImageAttachmentViewer
+          imageBase64={transaction.anexo}
+          isOpen={isImageViewerOpen}
+          onClose={() => setIsImageViewerOpen(false)}
+          transactionType={transactionTypeDisplayNames[transaction.type]}
+        />
+      )}
     </Modal>
   );
 };
