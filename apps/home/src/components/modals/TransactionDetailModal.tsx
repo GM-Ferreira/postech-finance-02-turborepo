@@ -74,6 +74,19 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
   });
 
   useEffect(() => {
+    if (!isOpen || !transaction) {
+      reset({
+        type: undefined,
+        amount: "",
+        date: "",
+        anexo: undefined,
+      });
+      setIsEditing(false);
+      setIsImageViewerOpen(false);
+    }
+  }, [isOpen, transactionId, transaction, reset]);
+
+  useEffect(() => {
     if (isEditing && transaction) {
       const amountAsString = String(transaction.value).replace(".", ",");
 
@@ -122,6 +135,13 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
   const handleClose = () => {
     setIsEditing(false);
     setIsSubmitting(false);
+    setIsImageViewerOpen(false);
+    reset({
+      type: undefined,
+      amount: "",
+      date: "",
+      anexo: undefined,
+    });
     onClose();
   };
 
@@ -290,7 +310,15 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
               <div className="mt-8 flex gap-4 w-full justify-center">
                 <button
                   type="button"
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => {
+                    setIsEditing(false);
+                    reset({
+                      type: undefined,
+                      amount: "",
+                      date: "",
+                      anexo: undefined,
+                    });
+                  }}
                   disabled={isSubmitting}
                   className="h-12 px-6 rounded-md bg-warning hover:opacity-100 opacity-80 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
