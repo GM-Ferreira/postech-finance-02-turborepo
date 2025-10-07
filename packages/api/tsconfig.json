@@ -5,9 +5,7 @@
     "rootDir": "./src",
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-    "types": ["node"],
-    "lib": ["es2022", "DOM"]
+    "sourceMap": true
   },
   "include": [
     "src/**/*"
