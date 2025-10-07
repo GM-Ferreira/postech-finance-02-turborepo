@@ -1,4 +1,4 @@
-export { Button } from "./Button";
+export { Button } from "./Button2";
 export { Input } from "./Input";
 export { Modal } from "./Modal";
 export { Select } from "./Select";
@@ -22,7 +22,13 @@ export { ReduxProvider } from "./providers/ReduxProvider";
 export { CrossAppSyncProvider } from "./components/CrossAppSyncProvider";
 export { useAppDispatch, useAppSelector } from "./store/hooks";
 export { useHydration } from "./hooks/useHydration";
-export { setUser, clearUser, setUserName, selectIsLoggedIn, selectUser } from "./store/userSlice";
+export {
+  setUser,
+  clearUser,
+  setUserName,
+  selectIsLoggedIn,
+  selectUser,
+} from "./store/userSlice";
 export type { UserState, UserData } from "./store/userSlice";
 export type { RootState, AppDispatch } from "./store/store";
 
