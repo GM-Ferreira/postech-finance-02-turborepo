@@ -17,7 +17,7 @@ export class BaseApiClient {
   private slowRequestTimers: Map<string, NodeJS.Timeout> = new Map();
 
   constructor(
-    baseURL: string = "https://postech-finance-02-api.onrender.com", // TODO - adicionar variável de ambiente
+    baseURL: string = process.env.NEXT_PUBLIC_API_BASE_URL || "",
     getTokenFn?: () => string | null,
     onUnauthorized?: () => void,
     onSlowRequest?: (show: boolean) => void
