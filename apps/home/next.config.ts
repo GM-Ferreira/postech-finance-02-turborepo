@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
 
     return config;
   },
+  transpilePackages: ["@repo/api", "@repo/ui"],
 };
 
 export default nextConfig;
