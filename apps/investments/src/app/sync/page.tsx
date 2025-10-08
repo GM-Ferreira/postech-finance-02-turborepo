@@ -21,17 +21,24 @@ export default function SyncPage() {
         if (syncData.token) {
           storageService.setAuthToken(syncData.token);
           console.log("Token salvo no localStorage");
+
+          const savedToken = storageService.getAuthToken();
+          console.log("Verificação - Token recuperado:", !!savedToken);
         }
         if (syncData.userData) {
           storageService.setUserData(syncData.userData);
           console.log("User data salvo no localStorage");
+
+          const savedUserData = storageService.getUserData();
+          console.log("Verificação - UserData recuperado:", savedUserData);
         }
         storageService.clearExternalLogoutFlag();
 
         console.log("Login sincronizado no app investments");
 
         setTimeout(() => {
-          window.location.href = "/";
+          console.log("Redirecionando para /investments...");
+          window.location.href = "/investments";
         }, 1000);
       } else if (syncData.action === "logout") {
         console.log("Processando logout sync...");
@@ -49,7 +56,6 @@ export default function SyncPage() {
       }
     });
 
-    // Log para confirmar que o cleanup foi criado
     console.log("Cleanup function criado:", typeof cleanup);
 
     return cleanup;

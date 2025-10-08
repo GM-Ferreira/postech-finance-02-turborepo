@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   SharedHeader,
   StorageService,
@@ -12,6 +12,7 @@ import {
   clearUser,
   useAppDispatch,
   selectIsLoggedIn,
+  setUser,
 } from "@repo/ui";
 
 const useInvestmentsHeaderData = () => {
@@ -19,7 +20,32 @@ const useInvestmentsHeaderData = () => {
   const reduxUser = useAppSelector((state) => state.user);
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const dispatch = useAppDispatch();
-  const storageService = new StorageService();
+  const storageService = useMemo(() => new StorageService(), []);
+
+  useEffect(() => {
+    console.log("Investments Header - Verificando localStorage...");
+
+    const token = storageService.getAuthToken();
+    const userData = storageService.getUserData();
+
+    console.log("LocalStorage state:", {
+      hasToken: !!token,
+      userData: userData,
+      reduxLoggedIn: isLoggedIn,
+    });
+
+    if (token && userData && !isLoggedIn) {
+      console.log("Carregando dados do localStorage para Redux...");
+      dispatch(
+        setUser({
+          name: userData.name || "",
+          email: userData.email || "",
+          accountId: userData.accountId || "",
+        })
+      );
+      console.log("Dados carregados para Redux");
+    }
+  }, [dispatch, isLoggedIn, storageService]);
 
   return {
     isLoggedIn,
