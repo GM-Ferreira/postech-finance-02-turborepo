@@ -13,7 +13,11 @@ export default function SyncPage() {
     const storageService = new StorageService();
 
     const cleanup = CrossDomainSyncService.setupMessageListener((syncData) => {
-      console.log("SUCESSO - Dados recebidos via PostMessage:", syncData);
+      console.log("SYNC: Dados recebidos no app investments:", {
+        action: syncData?.action,
+        hasToken: !!syncData?.token,
+        hasUserData: !!syncData?.userData,
+      });
 
       if (syncData.action === "login") {
         console.log("Processando login sync...");
@@ -53,6 +57,8 @@ export default function SyncPage() {
             process.env.NEXT_PUBLIC_HOME_URL || "http://localhost:3000";
           window.location.href = homeUrl;
         }, 1000);
+      } else {
+        console.log("Action desconhecida recebida:", syncData?.action);
       }
     });
 
