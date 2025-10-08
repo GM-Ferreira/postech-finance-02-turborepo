@@ -34,9 +34,17 @@ export class CrossDomainSyncService {
    * Obtém as origens permitidas baseado no ambiente
    */
   private static getAllowedOrigins(): string[] {
-    return this.isDevelopment()
+    const isDev = this.isDevelopment();
+    const origins = isDev
       ? this.ALLOWED_ORIGINS.development
       : this.ALLOWED_ORIGINS.production;
+
+    console.log("Allowed origins config:", {
+      environment: isDev ? "development" : "production",
+      origins,
+    });
+
+    return origins;
   }
 
   /**
@@ -50,14 +58,23 @@ export class CrossDomainSyncService {
     const investmentsUrl =
       process.env.NEXT_PUBLIC_INVESTMENTS_URL || "http://localhost:3001";
 
+    console.log("Cross-domain URLs:", {
+      current: currentUrl,
+      home: homeUrl,
+      investments: investmentsUrl,
+    });
+
     if (currentUrl === homeUrl) {
+      console.log("Current app: HOME → Target: INVESTMENTS");
       return investmentsUrl;
     }
 
     if (currentUrl === investmentsUrl) {
+      console.log("Current app: INVESTMENTS → Target: HOME");
       return homeUrl;
     }
 
+    console.warn("App não reconhecido para cross-domain sync:", currentUrl);
     return null;
   }
 
@@ -73,10 +90,14 @@ export class CrossDomainSyncService {
 
       const otherAppUrl = this.getOtherAppUrl();
       if (!otherAppUrl) {
-        console.warn("URL do outro app não encontrada");
+        console.warn("URL do outro app não encontrada - Sync ignorado");
         resolve();
         return;
       }
+
+      console.log(
+        `Iniciando sincronização ${syncData.action} para ${otherAppUrl}`
+      );
 
       try {
         const iframe = document.createElement("iframe");
@@ -85,6 +106,7 @@ export class CrossDomainSyncService {
         iframe.style.width = "1px";
         iframe.style.height = "1px";
 
+        console.log(`Criando iframe para: ${iframe.src}`);
         document.body.appendChild(iframe);
 
         const timeout = setTimeout(() => {
@@ -93,10 +115,17 @@ export class CrossDomainSyncService {
         }, 10000);
 
         iframe.onload = () => {
+          console.log("Iframe carregado, aguardando inicialização...");
+
           setTimeout(() => {
             try {
               if (iframe.contentWindow) {
+                console.log(
+                  `Enviando PostMessage para: ${otherAppUrl}`,
+                  syncData
+                );
                 iframe.contentWindow.postMessage(syncData, otherAppUrl);
+                console.log("Dados enviados via PostMessage:", syncData.action);
               } else {
                 console.warn("iframe.contentWindow não disponível");
               }
@@ -136,10 +165,21 @@ export class CrossDomainSyncService {
       return () => {};
     }
 
+    console.log("Configurando listener PostMessage...");
+
     const handleMessage = (event: MessageEvent) => {
+      console.log("PostMessage recebido:", {
+        origin: event.origin,
+        data: event.data,
+        currentUrl: window.location.origin,
+      });
+
       const allowedOrigins = this.getAllowedOrigins();
+      console.log("Origens permitidas:", allowedOrigins);
 
       if (!allowedOrigins.includes(event.origin)) {
+        console.warn("PostMessage de origem não confiável:", event.origin);
+        console.warn("Origens permitidas eram:", allowedOrigins);
         return;
       }
 
@@ -149,12 +189,15 @@ export class CrossDomainSyncService {
         return;
       }
 
+      console.log("Processando PostMessage válido:", data.action);
       onSync(data);
     };
 
     window.addEventListener("message", handleMessage);
+    console.log("Event listener PostMessage registrado");
 
     return () => {
+      console.log("Removendo event listener PostMessage");
       window.removeEventListener("message", handleMessage);
     };
   }
