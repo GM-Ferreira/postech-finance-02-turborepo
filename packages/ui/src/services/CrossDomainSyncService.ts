@@ -78,12 +78,6 @@ export class CrossDomainSyncService {
         return;
       }
 
-      if (this.isDevelopment()) {
-        this.handleLocalSync(syncData);
-        resolve();
-        return;
-      }
-
       try {
         const iframe = document.createElement("iframe");
         iframe.src = `${otherAppUrl}/sync`;
@@ -99,22 +93,25 @@ export class CrossDomainSyncService {
         }, 10000);
 
         iframe.onload = () => {
-          try {
-            if (iframe.contentWindow) {
-              iframe.contentWindow.postMessage(syncData, otherAppUrl);
-              console.log("Dados enviados via PostMessage:", syncData.action);
-            }
+          setTimeout(() => {
+            try {
+              if (iframe.contentWindow) {
+                iframe.contentWindow.postMessage(syncData, otherAppUrl);
+              } else {
+                console.error("iframe.contentWindow não disponível");
+              }
 
-            setTimeout(() => {
+              setTimeout(() => {
+                clearTimeout(timeout);
+                iframe.remove();
+                resolve();
+              }, 3000);
+            } catch (error) {
               clearTimeout(timeout);
               iframe.remove();
-              resolve();
-            }, 2000);
-          } catch (error) {
-            clearTimeout(timeout);
-            iframe.remove();
-            reject(error);
-          }
+              reject(error);
+            }
+          }, 1000);
         };
 
         iframe.onerror = () => {
@@ -141,8 +138,8 @@ export class CrossDomainSyncService {
 
     const handleMessage = (event: MessageEvent) => {
       const allowedOrigins = this.getAllowedOrigins();
+
       if (!allowedOrigins.includes(event.origin)) {
-        console.warn("PostMessage de origem não confiável:", event.origin);
         return;
       }
 
@@ -152,7 +149,6 @@ export class CrossDomainSyncService {
         return;
       }
 
-      console.log("Dados recebidos via PostMessage:", data.action);
       onSync(data);
     };
 
