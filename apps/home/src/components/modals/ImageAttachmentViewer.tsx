@@ -40,7 +40,7 @@ export const ImageAttachmentViewer = ({
       link.click();
       document.body.removeChild(link);
     } catch (error) {
-      console.error("Erro ao baixar a imagem:", error);
+      console.warn("Erro ao baixar a imagem:", error);
     }
   };
 

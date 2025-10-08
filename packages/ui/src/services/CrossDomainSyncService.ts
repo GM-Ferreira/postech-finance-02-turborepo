@@ -98,7 +98,7 @@ export class CrossDomainSyncService {
               if (iframe.contentWindow) {
                 iframe.contentWindow.postMessage(syncData, otherAppUrl);
               } else {
-                console.error("iframe.contentWindow não disponível");
+                console.warn("iframe.contentWindow não disponível");
               }
 
               setTimeout(() => {
@@ -120,7 +120,7 @@ export class CrossDomainSyncService {
           reject(new Error("Erro ao carregar iframe de sincronização"));
         };
       } catch (error) {
-        console.error("Erro ao criar iframe de sincronização:", error);
+        console.warn("Erro ao criar iframe de sincronização:", error);
         reject(error);
       }
     });

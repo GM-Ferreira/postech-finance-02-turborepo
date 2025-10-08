@@ -65,13 +65,13 @@ export const useTransactions = (
           const transactions = response.data.result.transactions;
           setTransactions(transactions);
         } else if (response.error) {
-          console.error("Error in fetchTransactions:", response.error);
+          console.warn("Error in fetchTransactions:", response.error);
           setError(response.error);
         }
       } catch (err) {
         const errorMsg = "Erro ao carregar transações";
         setError(errorMsg);
-        console.error({ errorMsg, err });
+        console.warn({ errorMsg, err });
       } finally {
         setIsLoading(false);
       }
@@ -127,7 +127,7 @@ export const useTransactions = (
 
         return response;
       } catch (err) {
-        console.error("Erro ao criar transação:", err);
+        console.warn("Erro ao criar transação:", err);
         throw err;
       }
     },
@@ -158,12 +158,12 @@ export const useTransactions = (
         if (response.data) {
           await fetchTransactions(true);
         } else if (response.error) {
-          console.error("Erro ao editar transação:", response.error);
+          console.warn("Erro ao editar transação:", response.error);
         }
 
         return response;
       } catch (err) {
-        console.error("Erro ao editar transação:", err);
+        console.warn("Erro ao editar transação:", err);
         throw err;
       }
     },
@@ -174,7 +174,7 @@ export const useTransactions = (
     async (transactionId: string) => {
       const response = await deleteTransaction(transactionId);
       if (response.error) {
-        console.error("Erro ao deletar transação:", response.error);
+        console.warn("Erro ao deletar transação:", response.error);
         throw new Error(
           `Erro ao deletar transação ${transactionId}: ${response.error}`
         );
@@ -195,7 +195,7 @@ export const useTransactions = (
 
         return response;
       } catch (err) {
-        console.error("Erro ao deletar transação:", err);
+        console.warn("Erro ao deletar transação:", err);
         throw err;
       }
     },
@@ -213,7 +213,7 @@ export const useTransactions = (
 
         await fetchTransactions(true);
       } catch (error) {
-        console.error("Erro ao deletar transações:", error);
+        console.warn("Erro ao deletar transações:", error);
         throw error;
       }
     },

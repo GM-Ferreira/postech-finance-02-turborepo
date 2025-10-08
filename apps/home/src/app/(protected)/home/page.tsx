@@ -75,7 +75,7 @@ export default function Home() {
       alert("Transação adicionada com sucesso!");
       reset();
     } catch (error) {
-      console.error("Erro ao adicionar transação:", error);
+      console.warn("Erro ao adicionar transação:", error);
       alert("Erro ao adicionar transação. Tente novamente.");
     }
   };

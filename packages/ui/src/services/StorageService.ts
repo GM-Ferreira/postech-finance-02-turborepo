@@ -14,7 +14,7 @@ export class StorageService {
       const serializedValue = JSON.stringify(value);
       window.localStorage.setItem(key, serializedValue);
     } catch (error) {
-      console.error(`Erro ao salvar no localStorage (chave: ${key}):`, error);
+      console.warn(`Erro ao salvar no localStorage (chave: ${key}):`, error);
     }
   }
 
@@ -29,7 +29,7 @@ export class StorageService {
       }
       return JSON.parse(serializedValue) as T;
     } catch (error) {
-      console.error(`Erro ao obter do localStorage (chave: ${key}):`, error);
+      console.warn(`Erro ao obter do localStorage (chave: ${key}):`, error);
       return null;
     }
   }

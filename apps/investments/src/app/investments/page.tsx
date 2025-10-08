@@ -57,7 +57,7 @@ export default function InvestmentsPage() {
         const parsedGoals = JSON.parse(savedGoals);
         setGoals(parsedGoals);
       } catch (error) {
-        console.error("Erro ao carregar metas do localStorage:", error);
+        console.warn("Erro ao carregar metas do localStorage:", error);
       }
     }
   }, []);

@@ -74,7 +74,7 @@ export const ImageUpload = ({
       onImageSelect(base64);
     } catch (err) {
       setError("Erro ao processar o arquivo. Tente novamente.");
-      console.error("Erro no upload:", err);
+      console.warn("Erro no upload:", err);
     } finally {
       setIsProcessing(false);
     }

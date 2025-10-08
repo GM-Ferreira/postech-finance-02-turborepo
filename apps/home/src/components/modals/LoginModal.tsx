@@ -42,7 +42,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         }
       } catch (error) {
         setError("Erro ao fazer login. Tente novamente.");
-        console.error("Login error:", error);
+        console.warn("Login error:", error);
       }
     } else {
       setError("Por favor, preencha ambos os campos.");

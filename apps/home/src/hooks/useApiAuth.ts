@@ -90,7 +90,7 @@ export const useApiAuth = (
 
         return response;
       } catch (error) {
-        console.error("Login error:", error);
+        console.warn("Login error:", error);
         return {
           error: "Login failed. Please check your credentials.",
           status: 401,

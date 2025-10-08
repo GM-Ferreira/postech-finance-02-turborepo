@@ -56,7 +56,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
         setError("Não foi possível criar a conta. Tente novamente.");
       }
     } catch (err: unknown) {
-      console.error("Erro no cadastro:", err);
+      console.warn("Erro no cadastro:", err);
       setError("Erro inesperado. Tente novamente.");
     }
   };

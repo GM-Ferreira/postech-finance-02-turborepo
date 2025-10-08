@@ -25,7 +25,7 @@ export async function middleware(request: NextRequest) {
         );
       }
     } catch (error) {
-      console.error("Investments service unavailable:", error);
+      console.warn("Investments service unavailable:", error);
       return NextResponse.rewrite(
         new URL("/investments-unavailable", request.url)
       );
