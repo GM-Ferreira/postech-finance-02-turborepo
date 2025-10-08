@@ -18,16 +18,12 @@ export default function SyncPage() {
         }
         storageService.clearExternalLogoutFlag();
 
-        console.log("Login sincronizado no app investments");
-
         setTimeout(() => {
           window.location.href = "/";
         }, 1000);
       } else if (syncData.action === "logout") {
         storageService.clearAllUserData();
         storageService.setExternalLogoutFlag();
-
-        console.log("Logout sincronizado no app investments");
 
         setTimeout(() => {
           const homeUrl =
