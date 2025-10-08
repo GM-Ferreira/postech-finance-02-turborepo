@@ -37,7 +37,7 @@ export const SharedNavigation = () => {
     const baseUrl = UrlUtils.getAppUrl(link.app);
 
     if (link.app === "investments") {
-      return UrlUtils.isProduction() ? baseUrl : `${baseUrl}/investments`;
+      return UrlUtils.isProduction() ? `${baseUrl}/investments` : baseUrl;
     }
 
     return `${baseUrl}${link.href}`;

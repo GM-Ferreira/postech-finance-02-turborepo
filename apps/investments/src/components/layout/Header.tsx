@@ -51,7 +51,9 @@ const useInvestmentsHeaderData = () => {
 const InvestmentsHeader = () => {
   const headerData = useInvestmentsHeaderData();
 
-  return <SharedHeader {...headerData} logoHref="/home" />;
+  const homeUrl = process.env.NEXT_PUBLIC_HOME_URL || "http://localhost:3000";
+
+  return <SharedHeader {...headerData} logoHref={`${homeUrl}/home`} />;
 };
 
 export default InvestmentsHeader;
