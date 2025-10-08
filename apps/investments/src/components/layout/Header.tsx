@@ -1,6 +1,6 @@
 "use client";
 
-import { SharedHeader, StorageService } from "@repo/ui";
+import { SharedHeader, StorageService, CrossDomainSyncService } from "@repo/ui";
 import {
   useAppSelector,
   clearUser,
@@ -24,13 +24,25 @@ const useInvestmentsHeaderData = () => {
     onSignUp: () => {
       window.location.href = "/home";
     },
-    onLogout: () => {
+    onLogout: async () => {
       storageService.setLocalLogoutFlag();
       storageService.clearAllUserData();
       dispatch(clearUser());
 
+      try {
+        await CrossDomainSyncService.syncLogout();
+        console.log("Header - Investments - Logout sincronizado entre apps");
+      } catch (error) {
+        console.warn(
+          "Header - Investments - Erro na sincronização de logout:",
+          error
+        );
+      }
+
       setTimeout(() => {
-        window.location.href = "/home";
+        const homeUrl =
+          process.env.NEXT_PUBLIC_HOME_URL || "http://localhost:3000";
+        window.location.href = homeUrl;
       }, 100);
     },
   };

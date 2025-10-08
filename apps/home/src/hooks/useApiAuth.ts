@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 
 import { AuthService } from "@repo/api";
-import { StorageService } from "@repo/ui";
+import { StorageService, CrossDomainSyncService } from "@repo/ui";
 import type {
   CreateUserRequest,
   LoginRequest,
@@ -65,15 +65,27 @@ export const useApiAuth = (
           const userResponse = await authService.getUserAccount();
           const userData = userResponse.data?.result;
 
+          const userDataToStore = {
+            name: userData?.userInfo?.username || "Nome não encontrado",
+            email: userData?.userInfo?.email || "Email não encontrado",
+            accountId: userData?.account[0]?.id || "Account não encontrada",
+          };
+
           if (userData) {
-            storageService.setUserData({
-              name: userData.userInfo.username || "Nome não encontrado",
-              email: userData.userInfo.email || "Não encontrado",
-              accountId: userData.account[0].id || "123",
-            });
+            storageService.setUserData(userDataToStore);
           }
 
           storageService.clearExternalLogoutFlag();
+
+          try {
+            await CrossDomainSyncService.syncLogin(
+              response.data.result.token,
+              userDataToStore
+            );
+            console.log("Login sincronizado entre apps");
+          } catch (error) {
+            console.warn("Erro na sincronização de login:", error);
+          }
         }
 
         return response;
@@ -90,8 +102,15 @@ export const useApiAuth = (
     [authService, storageService]
   );
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
     storageService.clearAllUserData();
+
+    try {
+      await CrossDomainSyncService.syncLogout();
+      console.log("Logout sincronizado entre apps");
+    } catch (error) {
+      console.warn("Erro na sincronização de logout:", error);
+    }
   }, [storageService]);
 
   const isAuthenticated = useCallback(() => {
