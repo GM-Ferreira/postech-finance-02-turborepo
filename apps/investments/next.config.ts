@@ -1,16 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  basePath: "/investments",
   async rewrites() {
     return [
       {
         source: "/home/:path*",
         destination: "http://localhost:3000/:path*",
-      },
-      {
-        source: "/investments/:path*",
-        destination: "http://localhost:3000/investments/:path*",
       },
     ];
   },
