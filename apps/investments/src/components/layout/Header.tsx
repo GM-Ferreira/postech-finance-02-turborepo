@@ -1,6 +1,12 @@
 "use client";
 
-import { SharedHeader, StorageService, CrossDomainSyncService } from "@repo/ui";
+import { useState } from "react";
+import {
+  SharedHeader,
+  StorageService,
+  CrossDomainSyncService,
+  LoadingOverlay,
+} from "@repo/ui";
 import {
   useAppSelector,
   clearUser,
@@ -9,6 +15,7 @@ import {
 } from "@repo/ui";
 
 const useInvestmentsHeaderData = () => {
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const reduxUser = useAppSelector((state) => state.user);
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const dispatch = useAppDispatch();
@@ -18,6 +25,7 @@ const useInvestmentsHeaderData = () => {
     isLoggedIn,
     currentUser: reduxUser.name ? { name: reduxUser.name } : null,
     isLoading: false,
+    isLoggingOut,
     onLogin: () => {
       window.location.href = "/home";
     },
@@ -25,35 +33,47 @@ const useInvestmentsHeaderData = () => {
       window.location.href = "/home";
     },
     onLogout: async () => {
-      storageService.setLocalLogoutFlag();
-      storageService.clearAllUserData();
-      dispatch(clearUser());
+      setIsLoggingOut(true);
 
       try {
-        await CrossDomainSyncService.syncLogout();
-        console.log("Header - Investments - Logout sincronizado entre apps");
-      } catch (error) {
-        console.warn(
-          "Header - Investments - Erro na sincronização de logout:",
-          error
-        );
-      }
+        storageService.setLocalLogoutFlag();
+        storageService.clearAllUserData();
+        dispatch(clearUser());
 
-      setTimeout(() => {
+        await CrossDomainSyncService.syncLogout();
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
         const homeUrl =
           process.env.NEXT_PUBLIC_HOME_URL || "http://localhost:3000";
         window.location.href = homeUrl;
-      }, 100);
+      } catch (error) {
+        console.warn("Erro durante logout:", error);
+
+        setTimeout(() => {
+          const homeUrl =
+            process.env.NEXT_PUBLIC_HOME_URL || "http://localhost:3000";
+          window.location.href = homeUrl;
+        }, 2000);
+      }
     },
   };
 };
 
 const InvestmentsHeader = () => {
   const headerData = useInvestmentsHeaderData();
-
   const homeUrl = process.env.NEXT_PUBLIC_HOME_URL || "http://localhost:3000";
 
-  return <SharedHeader {...headerData} logoHref={`${homeUrl}/home`} />;
+  return (
+    <>
+      <SharedHeader {...headerData} logoHref={`${homeUrl}/home`} />
+
+      <LoadingOverlay
+        isVisible={headerData.isLoggingOut}
+        message="Saindo da conta..."
+        submessage="Sincronizando dados entre aplicativos"
+      />
+    </>
+  );
 };
 
 export default InvestmentsHeader;

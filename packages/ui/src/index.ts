@@ -9,6 +9,8 @@ export type { AutocompleteOption, AutocompleteProps } from "./Autocomplete";
 export { SharedHeader } from "./components/SharedHeader";
 export type { SharedHeaderProps } from "./components/SharedHeader";
 export { SharedNavigation } from "./components/SharedNavigation";
+export { LoadingOverlay } from "./components/LoadingOverlay";
+export type { LoadingOverlayProps } from "./components/LoadingOverlay";
 
 // Utils
 export { UrlUtils } from "./utils/urls";

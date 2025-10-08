@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useAuthWithTransactions } from "@/hooks/useAuthWithTransactions";
 import {
@@ -10,9 +10,11 @@ import {
   useAppDispatch,
   selectIsLoggedIn,
   StorageService,
+  CrossDomainSyncService,
 } from "@repo/ui";
 
 export const useSharedHeaderData = () => {
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { isLoggedIn, logout, currentUser } = useAuthWithTransactions();
 
   const reduxUser = useAppSelector((state) => state.user);
@@ -61,12 +63,24 @@ export const useSharedHeaderData = () => {
     isLoggedIn: finalIsLoggedIn,
     currentUser: finalUser,
     isLoading: false,
+    isLoggingOut,
     onLogin: () => {},
     onSignUp: () => {},
-    onLogout: () => {
-      storageService.setLocalLogoutFlag();
-      logout();
-      dispatch(clearUser());
+    onLogout: async () => {
+      setIsLoggingOut(true);
+
+      try {
+        storageService.setLocalLogoutFlag();
+        logout();
+        dispatch(clearUser());
+
+        await CrossDomainSyncService.syncLogout();
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+      } catch (error) {
+        console.warn("Home - Erro durante logout:", error);
+      } finally {
+        setIsLoggingOut(false);
+      }
     },
   };
 };
