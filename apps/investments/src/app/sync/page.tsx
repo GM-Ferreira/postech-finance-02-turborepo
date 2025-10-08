@@ -6,24 +6,40 @@ import { CrossDomainSyncService, StorageService } from "@repo/ui";
 
 export default function SyncPage() {
   useEffect(() => {
+    console.log("Página /sync carregada - configurando listener...");
+    console.log("URL atual:", window.location.origin);
+    console.log("User Agent:", navigator.userAgent.substring(0, 50));
+
     const storageService = new StorageService();
 
     const cleanup = CrossDomainSyncService.setupMessageListener((syncData) => {
+      console.log("SUCESSO - Dados recebidos via PostMessage:", syncData);
+
       if (syncData.action === "login") {
+        console.log("Processando login sync...");
+
         if (syncData.token) {
           storageService.setAuthToken(syncData.token);
+          console.log("Token salvo no localStorage");
         }
         if (syncData.userData) {
           storageService.setUserData(syncData.userData);
+          console.log("User data salvo no localStorage");
         }
         storageService.clearExternalLogoutFlag();
+
+        console.log("Login sincronizado no app investments");
 
         setTimeout(() => {
           window.location.href = "/";
         }, 1000);
       } else if (syncData.action === "logout") {
+        console.log("Processando logout sync...");
+
         storageService.clearAllUserData();
         storageService.setExternalLogoutFlag();
+
+        console.log("Logout sincronizado no app investments");
 
         setTimeout(() => {
           const homeUrl =
@@ -32,6 +48,9 @@ export default function SyncPage() {
         }, 1000);
       }
     });
+
+    // Log para confirmar que o cleanup foi criado
+    console.log("Cleanup function criado:", typeof cleanup);
 
     return cleanup;
   }, []);
