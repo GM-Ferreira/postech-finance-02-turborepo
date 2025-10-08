@@ -5,6 +5,7 @@ export class StorageService {
   private static readonly THEME_KEY = "@bytebank/theme";
   private static readonly LOCAL_LOGOUT_FLAG = "local-logout-flag";
   private static readonly EXTERNAL_LOGOUT_FLAG = "external-logout-flag";
+  private static readonly SYNC_COMPLETED_FLAG = "@bytebank/sync-completed";
 
   public setItem<T>(key: string, value: T): void {
     if (typeof window === "undefined") {
@@ -135,5 +136,18 @@ export class StorageService {
       window.localStorage.getItem(StorageService.EXTERNAL_LOGOUT_FLAG) ===
       "true"
     );
+  }
+
+  /** Sync Completion Flag for Cross-App Communication */
+  public setSyncCompletedFlag(): void {
+    this.setItem(StorageService.SYNC_COMPLETED_FLAG, "true");
+  }
+
+  public clearSyncCompletedFlag(): void {
+    this.removeItem(StorageService.SYNC_COMPLETED_FLAG);
+  }
+
+  public hasSyncCompletedFlag(): boolean {
+    return this.getItem<string>(StorageService.SYNC_COMPLETED_FLAG) === "true";
   }
 }

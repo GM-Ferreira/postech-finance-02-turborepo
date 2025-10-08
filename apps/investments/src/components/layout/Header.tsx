@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+
 import {
   SharedHeader,
   StorageService,
   CrossDomainSyncService,
   LoadingOverlay,
-} from "@repo/ui";
-import {
   useAppSelector,
   clearUser,
   useAppDispatch,
@@ -25,25 +24,31 @@ const useInvestmentsHeaderData = () => {
   useEffect(() => {
     console.log("Investments Header - Verificando localStorage...");
 
-    const token = storageService.getAuthToken();
     const userData = storageService.getUserData();
+    const syncCompleted = storageService.hasSyncCompletedFlag();
 
     console.log("LocalStorage state:", {
-      hasToken: !!token,
-      userData: userData,
+      hasToken: storageService.isAuthenticated(),
+      userData,
       reduxLoggedIn: isLoggedIn,
+      syncCompleted,
     });
 
-    if (token && userData && !isLoggedIn) {
+    if (userData && !isLoggedIn) {
       console.log("Carregando dados do localStorage para Redux...");
       dispatch(
         setUser({
-          name: userData.name || "",
-          email: userData.email || "",
-          accountId: userData.accountId || "",
+          name: userData.name,
+          email: userData.email,
+          accountId: userData.accountId,
         })
       );
       console.log("Dados carregados para Redux");
+
+      if (syncCompleted) {
+        storageService.clearSyncCompletedFlag();
+        console.log("Flag de sync removida após carregar dados");
+      }
     }
   }, [dispatch, isLoggedIn, storageService]);
 

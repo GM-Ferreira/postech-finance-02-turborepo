@@ -38,6 +38,9 @@ export default function SyncPage() {
         }
         storageService.clearExternalLogoutFlag();
 
+        storageService.setSyncCompletedFlag();
+        console.log("Flag de sync completado definida");
+
         console.log("Login sincronizado no app investments");
 
         setTimeout(() => {

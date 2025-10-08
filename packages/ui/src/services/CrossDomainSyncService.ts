@@ -14,42 +14,31 @@ interface SyncData {
 }
 
 export class CrossDomainSyncService {
-  private static readonly ALLOWED_ORIGINS = {
-    development: ["http://localhost:3000", "http://localhost:3001"],
-    production: [
-      process.env.NEXT_PUBLIC_HOME_URL || "",
-      process.env.NEXT_PUBLIC_INVESTMENTS_URL || "",
-    ].filter(Boolean),
-  };
+  private static isSyncing = false;
 
-  /**
-   * Verifica se estamos em ambiente de desenvolvimento
-   */
   private static isDevelopment(): boolean {
     if (typeof window === "undefined") return false;
     return window.location.hostname === "localhost";
   }
 
-  /**
-   * Obtém as origens permitidas baseado no ambiente
-   */
   private static getAllowedOrigins(): string[] {
+    const homeUrl = process.env.NEXT_PUBLIC_HOME_URL || "http://localhost:3000";
+    const investmentsUrl =
+      process.env.NEXT_PUBLIC_INVESTMENTS_URL || "http://localhost:3001";
+
+    const origins = [homeUrl, investmentsUrl];
     const isDev = this.isDevelopment();
-    const origins = isDev
-      ? this.ALLOWED_ORIGINS.development
-      : this.ALLOWED_ORIGINS.production;
 
     console.log("Allowed origins config:", {
       environment: isDev ? "development" : "production",
+      homeUrl,
+      investmentsUrl,
       origins,
     });
 
     return origins;
   }
 
-  /**
-   * Obtém a URL do outro app para comunicação
-   */
   private static getOtherAppUrl(): string | null {
     if (typeof window === "undefined") return null;
 
@@ -78,15 +67,20 @@ export class CrossDomainSyncService {
     return null;
   }
 
-  /**
-   * Envia dados para o outro app via PostMessage
-   */
   public static sendSyncData(syncData: SyncData): Promise<void> {
     return new Promise((resolve, reject) => {
       if (typeof window === "undefined") {
         reject(new Error("Window não disponível"));
         return;
       }
+
+      if (this.isSyncing) {
+        console.log("Sync já em andamento, ignorando call adicional");
+        resolve();
+        return;
+      }
+
+      this.isSyncing = true;
 
       const otherAppUrl = this.getOtherAppUrl();
       if (!otherAppUrl) {
@@ -111,6 +105,7 @@ export class CrossDomainSyncService {
 
         const timeout = setTimeout(() => {
           iframe.remove();
+          this.isSyncing = false;
           reject(new Error("Timeout na sincronização"));
         }, 10000);
 
@@ -133,11 +128,13 @@ export class CrossDomainSyncService {
               setTimeout(() => {
                 clearTimeout(timeout);
                 iframe.remove();
+                this.isSyncing = false;
                 resolve();
               }, 3000);
             } catch (error) {
               clearTimeout(timeout);
               iframe.remove();
+              this.isSyncing = false;
               reject(error);
             }
           }, 1000);
@@ -155,9 +152,6 @@ export class CrossDomainSyncService {
     });
   }
 
-  /**
-   * Configura o listener para receber dados via PostMessage
-   */
   public static setupMessageListener(
     onSync: (syncData: SyncData) => void
   ): () => void {
@@ -202,9 +196,6 @@ export class CrossDomainSyncService {
     };
   }
 
-  /**
-   * Handle sync em desenvolvimento (localStorage compartilhado)
-   */
   private static handleLocalSync(syncData: SyncData): void {
     if (syncData.action === "logout") {
       localStorage.setItem("external-logout-flag", "true");
@@ -213,9 +204,6 @@ export class CrossDomainSyncService {
     }
   }
 
-  /**
-   * Sincroniza login entre apps
-   */
   public static syncLogin(
     token: string,
     userData: SyncData["userData"]
@@ -227,9 +215,6 @@ export class CrossDomainSyncService {
     });
   }
 
-  /**
-   * Sincroniza logout entre apps
-   */
   public static syncLogout(): Promise<void> {
     return this.sendSyncData({
       action: "logout",
