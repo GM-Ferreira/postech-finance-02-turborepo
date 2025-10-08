@@ -10,21 +10,22 @@ import { InvestmentGoalsModal } from "@/components/modals/InvestmentGoalsModal";
 import { EditInvestmentsModal } from "@/components/modals/EditInvestmentsModal";
 import {
   getInvestmentSummary,
-  investmentMockData,
   defaultInvestmentGoals,
   getInvestmentProgress,
   InvestmentGoals,
   InvestmentItem,
   simulateUpdate,
   updateInvestmentData,
+  getCurrentInvestmentData,
 } from "@/data/investmentMockData";
 
 export default function InvestmentsPage() {
   const [goals, setGoals] = useState<InvestmentGoals>(defaultInvestmentGoals);
   const [isGoalsModalOpen, setIsGoalsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [investments, setInvestments] =
-    useState<InvestmentItem[]>(investmentMockData);
+  const [investments, setInvestments] = useState<InvestmentItem[]>(() =>
+    getCurrentInvestmentData()
+  );
   const [updateKey, setUpdateKey] = useState(0);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -33,7 +34,7 @@ export default function InvestmentsPage() {
 
   const handleEditInvestments = (updatedInvestments: InvestmentItem[]) => {
     updateInvestmentData(updatedInvestments);
-    setInvestments(updatedInvestments);
+    setInvestments([...updatedInvestments]);
     setUpdateKey((prev) => prev + 1);
   };
 
@@ -45,7 +46,7 @@ export default function InvestmentsPage() {
     const newData = simulateUpdate();
 
     updateInvestmentData(newData);
-    setInvestments(newData);
+    setInvestments([...newData]);
     setUpdateKey((prev) => prev + 1);
     setIsUpdating(false);
   };

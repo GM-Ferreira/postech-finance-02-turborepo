@@ -6,7 +6,7 @@ export interface InvestmentItem extends Record<string, unknown> {
   type: "fixed" | "variable";
 }
 
-export const investmentMockData: InvestmentItem[] = [
+const initialInvestmentData: InvestmentItem[] = [
   {
     id: "1",
     name: "Fundos de investimento",
@@ -37,6 +37,25 @@ export const investmentMockData: InvestmentItem[] = [
   },
 ];
 
+class InvestmentDataManager {
+  private data: InvestmentItem[] = [...initialInvestmentData];
+
+  getData(): InvestmentItem[] {
+    return this.data;
+  }
+
+  updateData(newData: InvestmentItem[]): void {
+    this.data = [...newData];
+  }
+
+  resetData(): void {
+    this.data = [...initialInvestmentData];
+  }
+}
+
+const investmentManager = new InvestmentDataManager();
+export const investmentMockData = investmentManager.getData();
+
 export interface InvestmentGoals {
   fixedIncomeGoal: number;
   variableIncomeGoal: number;
@@ -48,11 +67,13 @@ export const defaultInvestmentGoals: InvestmentGoals = {
 };
 
 export const getInvestmentSummary = () => {
-  const fixedIncome = investmentMockData
+  const currentData = investmentManager.getData();
+
+  const fixedIncome = currentData
     .filter((item) => item.type === "fixed")
     .reduce((sum, item) => sum + item.value, 0);
 
-  const variableIncome = investmentMockData
+  const variableIncome = currentData
     .filter((item) => item.type === "variable")
     .reduce((sum, item) => sum + item.value, 0);
 
@@ -80,7 +101,9 @@ export const getInvestmentProgress = (goals: InvestmentGoals) => {
 };
 
 export const simulateUpdate = (): InvestmentItem[] => {
-  return investmentMockData.map((item) => {
+  const currentData = investmentManager.getData();
+
+  return currentData.map((item) => {
     let variation: number;
 
     if (item.type === "fixed") {
@@ -99,5 +122,9 @@ export const simulateUpdate = (): InvestmentItem[] => {
 };
 
 export const updateInvestmentData = (newData: InvestmentItem[]): void => {
-  investmentMockData.splice(0, investmentMockData.length, ...newData);
+  investmentManager.updateData(newData);
+};
+
+export const getCurrentInvestmentData = (): InvestmentItem[] => {
+  return investmentManager.getData();
 };
