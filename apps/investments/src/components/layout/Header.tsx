@@ -21,6 +21,40 @@ const useInvestmentsHeaderData = () => {
   const dispatch = useAppDispatch();
   const storageService = useMemo(() => new StorageService(), []);
 
+  // Monitor de localStorage para detectar limpeza
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const originalRemoveItem = localStorage.removeItem.bind(localStorage);
+    const originalClear = localStorage.clear.bind(localStorage);
+    const originalSetItem = localStorage.setItem.bind(localStorage);
+
+    localStorage.removeItem = function (key: string) {
+      console.log("🚨 localStorage.removeItem chamado:", key);
+      console.trace("Stack trace da remoção:");
+      return originalRemoveItem(key);
+    };
+
+    localStorage.clear = function () {
+      console.log("🚨 localStorage.clear chamado!");
+      console.trace("Stack trace da limpeza:");
+      return originalClear();
+    };
+
+    localStorage.setItem = function (key: string, value: string) {
+      if (key.includes("@bytebank")) {
+        console.log("📝 localStorage.setItem chamado:", key, "=", value);
+      }
+      return originalSetItem(key, value);
+    };
+
+    return () => {
+      localStorage.removeItem = originalRemoveItem;
+      localStorage.clear = originalClear;
+      localStorage.setItem = originalSetItem;
+    };
+  }, []);
+
   useEffect(() => {
     console.log("Investments Header - Verificando localStorage...");
 
