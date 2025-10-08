@@ -30,20 +30,20 @@ const useInvestmentsHeaderData = () => {
     const originalSetItem = localStorage.setItem.bind(localStorage);
 
     localStorage.removeItem = function (key: string) {
-      console.log("🚨 localStorage.removeItem chamado:", key);
+      console.log("localStorage.removeItem chamado:", key);
       console.trace("Stack trace da remoção:");
       return originalRemoveItem(key);
     };
 
     localStorage.clear = function () {
-      console.log("🚨 localStorage.clear chamado!");
+      console.log("localStorage.clear chamado!");
       console.trace("Stack trace da limpeza:");
       return originalClear();
     };
 
     localStorage.setItem = function (key: string, value: string) {
       if (key.includes("@bytebank")) {
-        console.log("📝 localStorage.setItem chamado:", key, "=", value);
+        console.log("localStorage.setItem chamado:", key, "=", value);
       }
       return originalSetItem(key, value);
     };
@@ -58,11 +58,37 @@ const useInvestmentsHeaderData = () => {
   useEffect(() => {
     console.log("Investments Header - Verificando localStorage...");
 
-    const userData = storageService.getUserData();
+    let userData = storageService.getUserData();
+    let hasToken = storageService.isAuthenticated();
     const syncCompleted = storageService.hasSyncCompletedFlag();
 
+    if (!userData || !hasToken) {
+      console.log(
+        "localStorage vazio, tentando recuperar do sessionStorage..."
+      );
+
+      const tokenBackup = sessionStorage.getItem("@bytebank/auth-token-backup");
+      const userDataBackup = sessionStorage.getItem(
+        "@bytebank/user-data-backup"
+      );
+
+      if (tokenBackup && userDataBackup) {
+        console.log("Backup encontrado! Restaurando dados...");
+
+        storageService.setAuthToken(tokenBackup);
+        const parsedUserData = JSON.parse(userDataBackup);
+        userData = parsedUserData;
+        storageService.setUserData(parsedUserData);
+        hasToken = true;
+
+        sessionStorage.removeItem("@bytebank/auth-token-backup");
+        sessionStorage.removeItem("@bytebank/user-data-backup");
+        console.log("Backups limpos após restaurar");
+      }
+    }
+
     console.log("LocalStorage state:", {
-      hasToken: storageService.isAuthenticated(),
+      hasToken,
       userData,
       reduxLoggedIn: isLoggedIn,
       syncCompleted,

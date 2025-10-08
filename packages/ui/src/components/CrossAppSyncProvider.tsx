@@ -26,14 +26,14 @@ export const CrossAppSyncProvider = ({
   useEffect(() => {
     if (typeof window === "undefined" || !isHydrated) return;
 
-    console.log("🔵 CrossAppSyncProvider: Verificando userData no mount");
+    console.log("CrossAppSyncProvider: Verificando userData no mount");
     const storage = new StorageService();
     const userData = storage.getUserData();
 
-    console.log("🔵 CrossAppSyncProvider: userData encontrado:", !!userData);
+    console.log("CrossAppSyncProvider: userData encontrado:", !!userData);
 
     if (userData) {
-      console.log("🔵 CrossAppSyncProvider: Despachando userData para Redux");
+      console.log("CrossAppSyncProvider: Despachando userData para Redux");
       isUpdatingFromExternalRef.current = true;
       dispatch(setUser(userData));
 
@@ -47,38 +47,29 @@ export const CrossAppSyncProvider = ({
     if (typeof window === "undefined") return;
 
     const handleUserStateChange = (event: CustomEvent) => {
-      console.log("🔵 CrossAppSyncProvider: handleUserStateChange chamado", {
+      console.log("CrossAppSyncProvider: handleUserStateChange chamado", {
         isUpdating: isUpdatingFromExternalRef.current,
         eventDetail: !!event.detail,
       });
 
       if (!isUpdatingFromExternalRef.current) {
         if (event.detail) {
-          console.log(
-            "🔵 CrossAppSyncProvider: Processando user change (login)"
-          );
+          console.log("CrossAppSyncProvider: Processando user change (login)");
           isUpdatingFromExternalRef.current = true;
           dispatch(setUser(event.detail));
           setTimeout(() => {
             isUpdatingFromExternalRef.current = false;
           }, 100);
         } else {
-          console.log(
-            "🔵 CrossAppSyncProvider: Processando user change (logout)"
-          );
+          console.log("CrossAppSyncProvider: Processando user change (logout)");
           const hasLocalLogout = storageService.hasLocalLogoutFlag();
-          console.log(
-            "🔵 CrossAppSyncProvider: hasLocalLogout:",
-            hasLocalLogout
-          );
+          console.log("CrossAppSyncProvider: hasLocalLogout:", hasLocalLogout);
 
           if (hasLocalLogout) {
-            console.log("🔵 CrossAppSyncProvider: Limpando flag local logout");
+            console.log("CrossAppSyncProvider: Limpando flag local logout");
             storageService.clearLocalLogoutFlag();
           } else {
-            console.log(
-              "🔵 CrossAppSyncProvider: Setando flag external logout"
-            );
+            console.log("CrossAppSyncProvider: Setando flag external logout");
             storageService.setExternalLogoutFlag();
           }
         }

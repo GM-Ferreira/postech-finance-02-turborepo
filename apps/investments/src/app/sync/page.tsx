@@ -41,11 +41,25 @@ export default function SyncPage() {
         storageService.setSyncCompletedFlag();
         console.log("Flag de sync completado definida");
 
+        // BACKUP: Salva também no sessionStorage como fallback
+        if (syncData.token) {
+          sessionStorage.setItem("@bytebank/auth-token-backup", syncData.token);
+          console.log("Token backup salvo no sessionStorage");
+        }
+        if (syncData.userData) {
+          sessionStorage.setItem(
+            "@bytebank/user-data-backup",
+            JSON.stringify(syncData.userData)
+          );
+          console.log("UserData backup salvo no sessionStorage");
+        }
+
         console.log("Login sincronizado no app investments");
 
+        // Tenta usar replace em vez de href para evitar reload completo
         setTimeout(() => {
           console.log("Redirecionando para /investments...");
-          window.location.href = "/investments";
+          window.location.replace("/investments");
         }, 1000);
       } else if (syncData.action === "logout") {
         console.log("Processando logout sync...");
