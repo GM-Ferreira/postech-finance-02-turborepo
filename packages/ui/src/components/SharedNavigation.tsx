@@ -4,9 +4,11 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 
 import { UrlUtils } from "../utils/urls";
+import { useCrossAppNavigation } from "../hooks/useCrossAppNavigation";
 
 export const SharedNavigation = () => {
   const pathname = usePathname();
+  const { navigateToApp } = useCrossAppNavigation();
 
   const navLinks = [
     { href: "/home", label: "Início", app: "home" as const },
@@ -72,9 +74,13 @@ export const SharedNavigation = () => {
         if (needsCrossAppNavigation) {
           const navigationUrl = getNavigationUrl(link);
           return (
-            <a key={link.label} href={navigationUrl} className={commonClasses}>
+            <button
+              key={link.label}
+              onClick={() => navigateToApp(navigationUrl)}
+              className={commonClasses}
+            >
               <span className={spanClasses}>{link.label}</span>
-            </a>
+            </button>
           );
         }
 

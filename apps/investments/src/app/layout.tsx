@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
-import { ReduxProvider } from "@repo/ui";
+import { ReduxProvider, CrossAppSyncProvider } from "@repo/ui";
 
 import "./globals.css";
 
@@ -23,7 +23,9 @@ export default function RootLayout({
   return (
     <html lang="pt">
       <body className={`${inter.variable} antialiased`}>
-        <ReduxProvider>{children}</ReduxProvider>
+        <ReduxProvider>
+          <CrossAppSyncProvider>{children}</CrossAppSyncProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

@@ -24,6 +24,7 @@ export { ReduxProvider } from "./providers/ReduxProvider";
 export { CrossAppSyncProvider } from "./components/CrossAppSyncProvider";
 export { useAppDispatch, useAppSelector } from "./store/hooks";
 export { useHydration } from "./hooks/useHydration";
+export { useCrossAppNavigation } from "./hooks/useCrossAppNavigation";
 export {
   setUser,
   clearUser,
@@ -36,3 +37,4 @@ export type { RootState, AppDispatch } from "./store/store";
 
 // Storage exports
 export { StorageService } from "./services/StorageService";
+export { HashAuthService } from "./services/HashAuthService";

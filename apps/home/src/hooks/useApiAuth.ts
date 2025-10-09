@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 
 import { AuthService } from "@repo/api";
-import { StorageService } from "@repo/ui";
+import { StorageService, HashAuthService } from "@repo/ui";
 import type {
   CreateUserRequest,
   LoginRequest,
@@ -117,6 +117,26 @@ export const useApiAuth = (
     }
   }, [authService]);
 
+  const navigateToInvestments = useCallback(() => {
+    const token = storageService.getAuthToken();
+    const userData = storageService.getUserData();
+
+    if (token && userData) {
+      const investmentsUrl =
+        process.env.NEXT_PUBLIC_INVESTMENTS_URL || "http://localhost:3001";
+      HashAuthService.redirectWithAuth(investmentsUrl, token, userData);
+    } else {
+      console.warn(
+        "Dados de autenticação não encontrados para navegação - redirecionando para login"
+      );
+
+      const homeUrl =
+        process.env.NEXT_PUBLIC_HOME_URL || "http://localhost:3000";
+
+      window.location.href = homeUrl;
+    }
+  }, [storageService]);
+
   return useMemo(
     () => ({
       register,
@@ -126,6 +146,7 @@ export const useApiAuth = (
       getCurrentUser,
       getAuthToken,
       getUserAccount,
+      navigateToInvestments,
       isLoading,
     }),
     [
@@ -136,6 +157,7 @@ export const useApiAuth = (
       getCurrentUser,
       getAuthToken,
       getUserAccount,
+      navigateToInvestments,
       isLoading,
     ]
   );

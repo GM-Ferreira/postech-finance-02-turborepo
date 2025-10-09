@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
-import { ReduxProvider } from "@repo/ui";
+import { ReduxProvider, CrossAppSyncProvider } from "@repo/ui";
 
 import { AuthProvider } from "@/context/AuthContext";
 import { TransactionsProvider } from "@/context/TransactionsContext";
@@ -30,15 +30,17 @@ export default function RootLayout({
     <html lang="pt-br">
       <body className={`${inter.variable}`}>
         <ReduxProvider>
-          <ToastProvider>
-            <AuthProvider>
-              <TransactionsProvider>
-                <Header />
-                {children}
-                <SlowApiToast />
-              </TransactionsProvider>
-            </AuthProvider>
-          </ToastProvider>
+          <CrossAppSyncProvider>
+            <ToastProvider>
+              <AuthProvider>
+                <TransactionsProvider>
+                  <Header />
+                  {children}
+                  <SlowApiToast />
+                </TransactionsProvider>
+              </AuthProvider>
+            </ToastProvider>
+          </CrossAppSyncProvider>
         </ReduxProvider>
       </body>
     </html>

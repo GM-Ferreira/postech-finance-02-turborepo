@@ -11,6 +11,7 @@ import {
   useAppDispatch,
   selectIsLoggedIn,
   setUser,
+  useCrossAppNavigation,
 } from "@repo/ui";
 
 const useInvestmentsHeaderData = () => {
@@ -19,6 +20,7 @@ const useInvestmentsHeaderData = () => {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const dispatch = useAppDispatch();
   const storageService = useMemo(() => new StorageService(), []);
+  const { logoutAndNavigateToHome } = useCrossAppNavigation();
 
   useEffect(() => {
     const userData = storageService.getUserData();
@@ -53,12 +55,9 @@ const useInvestmentsHeaderData = () => {
     onLogout: async () => {
       setIsLoggingOut(true);
 
-      storageService.clearUserData();
       dispatch(clearUser());
 
-      const homeUrl =
-        process.env.NEXT_PUBLIC_HOME_URL || "http://localhost:3000";
-      window.location.href = homeUrl;
+      logoutAndNavigateToHome();
     },
   };
 };
