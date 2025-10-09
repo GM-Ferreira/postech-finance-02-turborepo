@@ -9,7 +9,11 @@ interface ModalProps {
   children: React.ReactNode;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }: ModalProps) => {
+export const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  children,
+}: ModalProps) => {
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -23,27 +27,39 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }: Modal
     };
   }, [onClose]);
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
   if (typeof document === "undefined" || !isOpen) {
     return null;
   }
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
       onClick={onClose}
     >
       <div
-        className="relative h-full w-11/12 max-w-3xl bg-secondary p-8 shadow-xl"
+        className="relative w-full max-w-3xl max-h-full bg-secondary rounded-lg shadow-xl flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-black hover:text-gray-400 text-2xl"
+          className="absolute top-4 right-4 z-10 text-black hover:text-gray-400 text-2xl"
         >
           x
         </button>
 
-        {children}
+        <div className="overflow-y-auto p-8 pt-12">{children}</div>
       </div>
     </div>,
     document.body
