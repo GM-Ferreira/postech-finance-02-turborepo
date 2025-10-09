@@ -4,9 +4,15 @@ import { useCallback, useMemo } from "react";
 
 import { HashAuthService } from "../services/HashAuthService";
 import { StorageService } from "../services/StorageService";
+import { TokenValidationService } from "../services/TokenValidationService";
+import { AuthService } from "@repo/api";
 
 export const useCrossAppNavigation = () => {
   const storageService = useMemo(() => new StorageService(), []);
+
+  const authService = useMemo(() => {
+    return new AuthService(() => storageService.getAuthToken());
+  }, [storageService]);
 
   const navigateToApp = useCallback(
     (targetUrl: string) => {
@@ -48,15 +54,23 @@ export const useCrossAppNavigation = () => {
     }
   }, [storageService]);
 
-  const logoutAndNavigateToHome = useCallback(() => {
+  const logoutAndNavigateToHome = useCallback(async () => {
     const baseUrl = process.env.NEXT_PUBLIC_HOME_URL || "http://localhost:3000";
     const homeUrl = `${baseUrl}/home`;
 
+    console.log("Fazendo logout no servidor...");
+
+    try {
+      await TokenValidationService.logoutOnServer(authService);
+    } catch (error) {
+      console.warn("Erro no logout do servidor:", error);
+    }
+
     storageService.clearAllUserData();
 
-    console.log("Fazendo logout e redirecionando para home...");
+    console.log("Redirecionando para home...");
     HashAuthService.redirectWithLogout(homeUrl);
-  }, [storageService]);
+  }, [storageService, authService]);
 
   return {
     navigateToApp,

@@ -2,15 +2,19 @@
 
 import { useState, useCallback, useMemo } from "react";
 
-import { AuthService } from "@repo/api";
-import { StorageService, HashAuthService } from "@repo/ui";
-import type {
-  CreateUserRequest,
-  LoginRequest,
-  ApiResponse,
-  CreateUserResponse,
-  LoginResponse,
-  GetUserAccountResponse,
+import {
+  StorageService,
+  HashAuthService,
+  TokenValidationService,
+} from "@repo/ui";
+import {
+  type CreateUserRequest,
+  type LoginRequest,
+  type ApiResponse,
+  type CreateUserResponse,
+  type LoginResponse,
+  type GetUserAccountResponse,
+  AuthService,
 } from "@repo/api";
 
 export const useApiAuth = (
@@ -89,9 +93,34 @@ export const useApiAuth = (
     [authService, storageService]
   );
 
-  const logout = useCallback(async () => {
-    storageService.clearAllUserData();
-  }, [storageService]);
+  const logout = useCallback(async (): Promise<boolean> => {
+    setIsLoading(true);
+
+    try {
+      const serverLogoutSuccess =
+        await TokenValidationService.logoutOnServer(authService);
+
+      if (serverLogoutSuccess) {
+        console.log("Logout realizado no servidor com sucesso");
+      } else {
+        console.warn(
+          "Erro no logout do servidor, mas continuando com logout local"
+        );
+      }
+
+      storageService.clearAllUserData();
+
+      return true;
+    } catch (error) {
+      console.warn("Erro durante logout:", error);
+
+      storageService.clearAllUserData();
+
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [authService, storageService]);
 
   const isAuthenticated = useCallback(() => {
     return storageService.isAuthenticated();
