@@ -43,4 +43,24 @@ export class UserClient extends BaseApiClient {
   async getUserAccount(): Promise<ApiResponse<GetUserAccountResponse>> {
     return this.get<GetUserAccountResponse>("/account");
   }
+
+  /**
+   * Logout user - invalidates token on server
+   * POST /user/logout
+   */
+  async logout(): Promise<ApiResponse<{ message: string }>> {
+    return this.post<{ message: string }>("/user/logout", {});
+  }
+
+  /**
+   * Validate token on server
+   * GET /user/validate-token
+   */
+  async validateToken(): Promise<
+    ApiResponse<{ result: { valid: boolean; user?: any } }>
+  > {
+    return this.get<{ result: { valid: boolean; user?: any } }>(
+      "/user/validate-token"
+    );
+  }
 }

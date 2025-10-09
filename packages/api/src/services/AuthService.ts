@@ -81,4 +81,36 @@ export class AuthService {
       };
     }
   }
+
+  /**
+   * Logout user - invalidates token on server
+   */
+  async logout(): Promise<ApiResponse<{ message: string }>> {
+    try {
+      const response = await this.userClient.logout();
+      return response;
+    } catch (error) {
+      return {
+        error: "Logout failed.",
+        status: 500,
+      };
+    }
+  }
+
+  /**
+   * Validate token on server
+   */
+  async validateToken(): Promise<
+    ApiResponse<{ result: { valid: boolean; user?: any } }>
+  > {
+    try {
+      const response = await this.userClient.validateToken();
+      return response;
+    } catch (error) {
+      return {
+        error: "Token validation failed.",
+        status: 500,
+      };
+    }
+  }
 }

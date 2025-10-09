@@ -38,3 +38,4 @@ export type { RootState, AppDispatch } from "./store/store";
 // Storage exports
 export { StorageService } from "./services/StorageService";
 export { HashAuthService } from "./services/HashAuthService";
+export { TokenValidationService } from "./services/TokenValidationService";
