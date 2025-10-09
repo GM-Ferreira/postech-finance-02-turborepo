@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 
 import { AuthService } from "@repo/api";
-import { StorageService, CrossDomainSyncService } from "@repo/ui";
+import { StorageService } from "@repo/ui";
 import type {
   CreateUserRequest,
   LoginRequest,
@@ -24,7 +24,6 @@ export const useApiAuth = (
   const handleTokenExpired = useCallback(() => {
     console.warn("Token expirado - limpando dados e notificando Context");
     storageService.clearAllUserData();
-    storageService.setExternalLogoutFlag();
     onTokenExpired?.();
   }, [storageService, onTokenExpired]);
 
@@ -74,18 +73,6 @@ export const useApiAuth = (
           if (userData) {
             storageService.setUserData(userDataToStore);
           }
-
-          storageService.clearExternalLogoutFlag();
-
-          try {
-            await CrossDomainSyncService.syncLogin(
-              response.data.result.token,
-              userDataToStore
-            );
-            console.log("Login sincronizado entre apps");
-          } catch (error) {
-            console.warn("Erro na sincronização de login:", error);
-          }
         }
 
         return response;
@@ -104,13 +91,6 @@ export const useApiAuth = (
 
   const logout = useCallback(async () => {
     storageService.clearAllUserData();
-
-    try {
-      await CrossDomainSyncService.syncLogout();
-      console.log("Logout sincronizado entre apps");
-    } catch (error) {
-      console.warn("Erro na sincronização de logout:", error);
-    }
   }, [storageService]);
 
   const isAuthenticated = useCallback(() => {

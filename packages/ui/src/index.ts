@@ -36,6 +36,3 @@ export type { RootState, AppDispatch } from "./store/store";
 
 // Storage exports
 export { StorageService } from "./services/StorageService";
-
-// Cross-domain sync exports
-export { CrossDomainSyncService } from "./services/CrossDomainSyncService";

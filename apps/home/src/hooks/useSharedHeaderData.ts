@@ -10,7 +10,6 @@ import {
   useAppDispatch,
   selectIsLoggedIn,
   StorageService,
-  CrossDomainSyncService,
 } from "@repo/ui";
 
 export const useSharedHeaderData = () => {
@@ -23,14 +22,6 @@ export const useSharedHeaderData = () => {
   const storageService = useMemo(() => new StorageService(), []);
 
   useEffect(() => {
-    const hasExternalLogout = storageService.hasExternalLogoutFlag();
-
-    if (hasExternalLogout && isLoggedIn) {
-      storageService.clearExternalLogoutFlag();
-      logout();
-      return;
-    }
-
     if (isLoggedIn && currentUser && !reduxIsLoggedIn) {
       const userData = storageService.getUserData();
       if (userData?.accountId) {
@@ -45,14 +36,7 @@ export const useSharedHeaderData = () => {
     } else if (!isLoggedIn && reduxIsLoggedIn) {
       dispatch(clearUser());
     }
-  }, [
-    isLoggedIn,
-    currentUser,
-    reduxIsLoggedIn,
-    dispatch,
-    logout,
-    storageService,
-  ]);
+  }, [isLoggedIn, currentUser, reduxIsLoggedIn, dispatch, storageService]);
 
   const finalUser =
     currentUser || (reduxUser.name ? { name: reduxUser.name } : null);
@@ -70,12 +54,8 @@ export const useSharedHeaderData = () => {
       setIsLoggingOut(true);
 
       try {
-        storageService.setLocalLogoutFlag();
         logout();
         dispatch(clearUser());
-
-        await CrossDomainSyncService.syncLogout();
-        await new Promise((resolve) => setTimeout(resolve, 1500));
       } catch (error) {
         console.warn("Home - Erro durante logout:", error);
       } finally {

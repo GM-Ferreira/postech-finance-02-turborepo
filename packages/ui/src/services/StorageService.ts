@@ -3,8 +3,7 @@ export class StorageService {
   private static readonly AUTH_TOKEN_KEY = "@bytebank/auth-token";
   private static readonly SHOW_BALANCE_KEY = "@bytebank/show-balance";
   private static readonly THEME_KEY = "@bytebank/theme";
-  private static readonly LOCAL_LOGOUT_FLAG = "local-logout-flag";
-  private static readonly EXTERNAL_LOGOUT_FLAG = "external-logout-flag";
+
   private static readonly SYNC_COMPLETED_FLAG = "@bytebank/sync-completed";
 
   public setItem<T>(key: string, value: T): void {
@@ -100,54 +99,5 @@ export class StorageService {
     this.clearAuthToken();
     this.clearUserData();
     this.removeItem(StorageService.SHOW_BALANCE_KEY);
-  }
-
-  /** Sync Flags for Cross-App Communication */
-  public setLocalLogoutFlag(): void {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(StorageService.LOCAL_LOGOUT_FLAG, "true");
-  }
-
-  public clearLocalLogoutFlag(): void {
-    if (typeof window === "undefined") return;
-    window.localStorage.removeItem(StorageService.LOCAL_LOGOUT_FLAG);
-  }
-
-  public hasLocalLogoutFlag(): boolean {
-    if (typeof window === "undefined") return false;
-    return (
-      window.localStorage.getItem(StorageService.LOCAL_LOGOUT_FLAG) === "true"
-    );
-  }
-
-  public setExternalLogoutFlag(): void {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(StorageService.EXTERNAL_LOGOUT_FLAG, "true");
-  }
-
-  public clearExternalLogoutFlag(): void {
-    if (typeof window === "undefined") return;
-    window.localStorage.removeItem(StorageService.EXTERNAL_LOGOUT_FLAG);
-  }
-
-  public hasExternalLogoutFlag(): boolean {
-    if (typeof window === "undefined") return false;
-    return (
-      window.localStorage.getItem(StorageService.EXTERNAL_LOGOUT_FLAG) ===
-      "true"
-    );
-  }
-
-  /** Sync Completion Flag for Cross-App Communication */
-  public setSyncCompletedFlag(): void {
-    this.setItem(StorageService.SYNC_COMPLETED_FLAG, "true");
-  }
-
-  public clearSyncCompletedFlag(): void {
-    this.removeItem(StorageService.SYNC_COMPLETED_FLAG);
-  }
-
-  public hasSyncCompletedFlag(): boolean {
-    return this.getItem<string>(StorageService.SYNC_COMPLETED_FLAG) === "true";
   }
 }
