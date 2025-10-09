@@ -3,9 +3,7 @@ import { NextConfig } from "next";
 const nextConfig: NextConfig = {
   async rewrites() {
     const investmentsInternalUrl =
-      process.env.NODE_ENV === "production"
-        ? "https://bytebank-investments.vercel.app"
-        : "http://localhost:3001";
+      process.env.NEXT_PUBLIC_INVESTMENTS_URL || "http://localhost:3001";
 
     return [
       {

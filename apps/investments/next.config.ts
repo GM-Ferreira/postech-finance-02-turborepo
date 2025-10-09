@@ -2,10 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   async rewrites() {
+    const homeUrl = process.env.NEXT_PUBLIC_HOME_URL || "http://localhost:3000";
+
     return [
       {
         source: "/home/:path*",
-        destination: "http://localhost:3000/:path*",
+        destination: `${homeUrl}/:path*`,
       },
     ];
   },
