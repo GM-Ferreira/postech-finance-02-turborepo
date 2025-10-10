@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
+
   async rewrites() {
     const homeUrl = process.env.NEXT_PUBLIC_HOME_URL || "http://localhost:3000";
 

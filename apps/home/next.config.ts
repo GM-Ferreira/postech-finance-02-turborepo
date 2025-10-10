@@ -1,6 +1,8 @@
 import { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
+
   async rewrites() {
     const investmentsInternalUrl =
       process.env.NEXT_PUBLIC_INVESTMENTS_URL || "http://localhost:3001";

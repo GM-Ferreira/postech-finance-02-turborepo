@@ -1,0 +1,36 @@
+services:
+  home:
+    container_name: home
+    build:
+      context: .
+      dockerfile: ./apps/home/Dockerfile
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_BASE_URL=https://postech-finance-02-api.onrender.com
+      - NEXT_PUBLIC_HOME_URL=http://localhost:3000
+      - NEXT_PUBLIC_INVESTMENTS_URL=http://localhost:3001
+    networks:
+      - app_network
+
+  investments:
+    container_name: investments
+    build:
+      context: .
+      dockerfile: ./apps/investments/Dockerfile
+    restart: always
+    ports:
+      - 3001:3001
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_BASE_URL=https://postech-finance-02-api.onrender.com
+      - NEXT_PUBLIC_HOME_URL=http://localhost:3000
+      - NEXT_PUBLIC_INVESTMENTS_URL=http://localhost:3001
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    external: true

@@ -9,7 +9,12 @@
     "check-types": "turbo run check-types",
     "clean": "turbo run clean && npm run clean:cache",
     "clean:cache": "rm -rf .turbo && find . -name '.turbo' -type d -prune -exec rm -rf '{}' + && find . -name '.next' -type d -prune -exec rm -rf '{}' + && find . -name 'node_modules/.cache' -type d -prune -exec rm -rf '{}' +",
-    "reinstall": "npm run clean:cache && rm -rf node_modules && find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && npm install"
+    "reinstall": "npm run clean:cache && rm -rf node_modules && find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && npm install",
+    "docker:network": "docker network create app_network || true",
+    "docker:build": "npm run docker:network && COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:dev": "npm run docker:build && npm run docker:up"
   },
   "devDependencies": {
     "prettier": "^3.6.2",
